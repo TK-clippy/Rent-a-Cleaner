@@ -12,14 +12,16 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary   : #1976D2;
-$secondary : #26A69A;
-$accent    : #9C27B0;
+// Glavne boje tvoje aplikacije (Moderna paleta)
+$primary: #00b4d8; // Vibrantna boja (kao Wolt plava ili Glovo žuta - promijeni po želji)
+$secondary: #2b2d42; // Tamna za tekst i akcente
+$accent: #ffb703; // Za zvjezdice, popuste i bedževe
 
-$dark      : #1D1D1D;
-$dark-page : #121212;
+$dark: #1d1d1d;
+$positive: #21ba45;
+$negative: #ef233c;
+$info: #31ccec;
+$warning: #f2c037;
 
-$positive  : #21BA45;
-$negative  : #C10015;
-$info      : #31CCEC;
-$warning   : #F2C037;
+// Pozadinska boja (lagana siva umjesto čiste bijele za bolji kontrast kartica)
+$body-background: #f8f9fa;
