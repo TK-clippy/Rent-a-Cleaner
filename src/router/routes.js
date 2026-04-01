@@ -4,17 +4,26 @@ const routes = [
     path: '/',
     component: () => import('layouts/ClientLayout.vue'),
     children: [
-      { path: '', name: 'client-home', component: () => import('pages/client/Home.vue') },
-      { path: 'search', name: 'client-search', component: () => import('pages/client/Search.vue') },
+      // Prazan path ('') znači da je ovo početna stranica na http://localhost:9000/#/
+      {
+        path: '',
+        name: 'client-home',
+        component: () => import('pages/client/ClientHome.vue'),
+      },
+      {
+        path: 'search',
+        name: 'client-search',
+        component: () => import('pages/client/ClientSearch.vue'),
+      },
       {
         path: 'checkout',
         name: 'client-checkout',
-        component: () => import('pages/client/Checkout.vue'),
+        component: () => import('pages/client/ClientCheckout.vue'),
       },
       {
         path: 'bookings',
         name: 'client-bookings',
-        component: () => import('pages/client/Bookings.vue'),
+        component: () => import('pages/client/ClientBookings.vue'),
       },
     ],
   },
@@ -27,22 +36,22 @@ const routes = [
       {
         path: '',
         name: 'cleaner-dashboard',
-        component: () => import('pages/cleaner/Dashboard.vue'),
+        component: () => import('pages/cleaner/CleanerDashboard.vue'),
       },
       {
         path: 'calendar',
         name: 'cleaner-calendar',
-        component: () => import('pages/cleaner/Calendar.vue'),
+        component: () => import('pages/cleaner/CleanerCalendar.vue'),
       },
       {
         path: 'active-job',
         name: 'cleaner-active-job',
-        component: () => import('pages/cleaner/ActiveJob.vue'),
+        component: () => import('src/pages/cleaner/CleanerActiveJob.vue'),
       },
       {
         path: 'profile',
         name: 'cleaner-profile',
-        component: () => import('pages/cleaner/Profile.vue'),
+        component: () => import('pages/cleaner/CleanerProfile.vue'),
       },
     ],
   },
@@ -52,13 +61,25 @@ const routes = [
     path: '/admin',
     component: () => import('layouts/AdminLayout.vue'),
     children: [
-      { path: '', name: 'admin-metrics', component: () => import('pages/admin/Metrics.vue') },
-      { path: 'users', name: 'admin-users', component: () => import('pages/admin/Users.vue') },
-      { path: 'chat', name: 'admin-chat', component: () => import('pages/admin/Chat.vue') },
+      {
+        path: '',
+        name: 'admin-metrics',
+        component: () => import('pages/admin/AdminMetrics.vue'),
+      },
+      {
+        path: 'users',
+        name: 'admin-users',
+        component: () => import('pages/admin/AdminUsers.vue'),
+      },
+      {
+        path: 'chat',
+        name: 'admin-chat',
+        component: () => import('pages/admin/AdminChat.vue'),
+      },
     ],
   },
 
-  // Catch-all za 404
+  // Catch-all za 404 stranicu
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
