@@ -1,17 +1,26 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+// eslint-disable-next-line no-unused-vars
 import db from './config/db.js'
+
+// Importaj kreirane rute
+import authRoutes from './routes/authRoutes.js'
+import cleanerRoutes from './routes/cleanerRoutes.js'
+import bookingRoutes from './routes/bookingRoutes.js'
 
 dotenv.config()
 
 const app = express()
 
-// Middlewares
 app.use(cors())
 app.use(express.json())
 
-// Osnovna ruta za testiranje
+// Povezivanje ruta
+app.use('/api/auth', authRoutes)
+app.use('/api/cleaners', cleanerRoutes)
+app.use('/api/bookings', bookingRoutes)
+
 app.get('/', (req, res) => {
   res.send('Rent-A-Cleaner API is running...')
 })
