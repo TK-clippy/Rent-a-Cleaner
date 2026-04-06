@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
       <div>
-        <div class="text-h5 text-weight-bold">Pozdrav, Marko! 👋</div>
+        <div class="text-h5 text-weight-bold">Pozdrav, Marko!</div>
         <div class="text-subtitle2 text-grey-7">Što čistimo danas?</div>
       </div>
       <q-btn round flat icon="notifications" color="grey-7">
@@ -43,22 +43,26 @@ const kategorije = ref([
   {
     id: 'generalno',
     naziv: 'Osnovno',
-    slika: 'https://images.unsplash.com/photo-1581578731548-c64695cc6954?q=80&w=400',
+    slika:
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop',
   },
   {
     id: 'dubinsko',
     naziv: 'Dubinsko',
-    slika: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=400',
+    slika:
+      'https://images.unsplash.com/photo-1558317374-067fb5f30001?q=80&w=400&auto=format&fit=crop',
   },
   {
     id: 'gradjevina',
     naziv: 'Nakon radova',
-    slika: 'https://images.unsplash.com/photo-1505798577917-a65157d3320a?q=80&w=400',
+    slika:
+      'https://images.unsplash.com/photo-1505798577917-a65157d3320a?q=80&w=400&auto=format&fit=crop',
   },
   {
     id: 'bazeni',
     naziv: 'Bazeni',
-    slika: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=400',
+    slika:
+      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=400&auto=format&fit=crop',
   },
 ])
 

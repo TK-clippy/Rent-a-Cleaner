@@ -1,15 +1,13 @@
-const routes = [
-  // --- KLIJENT (Naručitelj) ---
-  {
+const appMode = process.env.APP_MODE || 'client'
+const routes = []
+
+// --- KLIJENT ---
+if (appMode === 'client') {
+  routes.push({
     path: '/',
     component: () => import('layouts/ClientLayout.vue'),
     children: [
-      // Prazan path ('') znači da je ovo početna stranica na http://localhost:9000/#/
-      {
-        path: '',
-        name: 'client-home',
-        component: () => import('pages/client/ClientHome.vue'),
-      },
+      { path: '', name: 'client-home', component: () => import('pages/client/ClientHome.vue') },
       {
         path: 'search',
         name: 'client-search',
@@ -26,11 +24,13 @@ const routes = [
         component: () => import('pages/client/ClientBookings.vue'),
       },
     ],
-  },
+  })
+}
 
-  // --- ČISTAČ (Zaposlenik) ---
-  {
-    path: '/cleaner',
+// --- ČISTAČ ---
+if (appMode === 'cleaner') {
+  routes.push({
+    path: '/',
     component: () => import('layouts/CleanerLayout.vue'),
     children: [
       {
@@ -46,7 +46,7 @@ const routes = [
       {
         path: 'active-job',
         name: 'cleaner-active-job',
-        component: () => import('src/pages/cleaner/CleanerActiveJob.vue'),
+        component: () => import('pages/cleaner/CleanerActiveJob.vue'),
       },
       {
         path: 'profile',
@@ -54,36 +54,23 @@ const routes = [
         component: () => import('pages/cleaner/CleanerProfile.vue'),
       },
     ],
-  },
+  })
+}
 
-  // --- AGENCIJA (Admin - Desktop Only) ---
-  {
-    path: '/admin',
-    component: () => import('layouts/AdminLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'admin-metrics',
-        component: () => import('pages/admin/AdminMetrics.vue'),
-      },
-      {
-        path: 'users',
-        name: 'admin-users',
-        component: () => import('pages/admin/AdminUsers.vue'),
-      },
-      {
-        path: 'chat',
-        name: 'admin-chat',
-        component: () => import('pages/admin/AdminChat.vue'),
-      },
-    ],
-  },
+// --- ADMIN & 404 ---
+routes.push({
+  path: '/admin',
+  component: () => import('layouts/AdminLayout.vue'),
+  children: [
+    { path: '', name: 'admin-metrics', component: () => import('pages/admin/AdminMetrics.vue') },
+    { path: 'users', name: 'admin-users', component: () => import('pages/admin/AdminUsers.vue') },
+    { path: 'chat', name: 'admin-chat', component: () => import('pages/admin/AdminChat.vue') },
+  ],
+})
 
-  // Catch-all za 404 stranicu
-  {
-    path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'),
-  },
-]
+routes.push({
+  path: '/:catchAll(.*)*',
+  component: () => import('pages/ErrorNotFound.vue'),
+})
 
 export default routes
