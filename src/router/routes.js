@@ -1,63 +1,70 @@
-const appMode = process.env.APP_MODE || 'client'
+// Za sada zanemarujemo APP_MODE kako bismo testirali rade li sve rute ispravno.
 const routes = []
 
 // --- KLIJENT ---
-if (appMode === 'client') {
-  routes.push({
-    path: '/',
-    component: () => import('layouts/ClientLayout.vue'),
-    children: [
-      { path: '', name: 'client-home', component: () => import('pages/client/ClientHome.vue') },
-      {
-        path: 'search',
-        name: 'client-search',
-        component: () => import('pages/client/ClientSearch.vue'),
-      },
-      {
-        path: 'checkout',
-        name: 'client-checkout',
-        component: () => import('pages/client/ClientCheckout.vue'),
-      },
-      {
-        path: 'bookings',
-        name: 'client-bookings',
-        component: () => import('pages/client/ClientBookings.vue'),
-      },
-    ],
-  })
-}
+routes.push({
+  path: '/client',
+  component: () => import('layouts/ClientLayout.vue'),
+  children: [
+    {
+      path: 'home',
+      name: 'client-home',
+      component: () => import('pages/client/ClientHome.vue'),
+    },
+    {
+      path: 'search',
+      name: 'client-search',
+      component: () => import('pages/client/ClientSearch.vue'),
+    },
+    {
+      path: 'checkout',
+      name: 'client-checkout',
+      component: () => import('pages/client/ClientCheckout.vue'),
+    },
+    {
+      path: 'bookings',
+      name: 'client-bookings',
+      component: () => import('pages/client/ClientBookings.vue'),
+    },
+  ],
+})
+
+// --- AUTH (Prijava i Registracija) ---
+routes.push({
+  path: '/auth/login',
+  name: 'login',
+  component: () => import('pages/auth/UserLogin.vue'),
+})
 
 // --- ČISTAČ ---
-if (appMode === 'cleaner') {
-  routes.push({
-    path: '/',
-    component: () => import('layouts/CleanerLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'cleaner-dashboard',
-        component: () => import('pages/cleaner/CleanerDashboard.vue'),
-      },
-      {
-        path: 'calendar',
-        name: 'cleaner-calendar',
-        component: () => import('pages/cleaner/CleanerCalendar.vue'),
-      },
-      {
-        path: 'active-job',
-        name: 'cleaner-active-job',
-        component: () => import('pages/cleaner/CleanerActiveJob.vue'),
-      },
-      {
-        path: 'profile',
-        name: 'cleaner-profile',
-        component: () => import('pages/cleaner/CleanerProfile.vue'),
-      },
-    ],
-  })
-}
+routes.push({
+  path: '/cleaner',
+  component: () => import('layouts/CleanerLayout.vue'),
+  children: [
+    {
+      path: 'dashboard',
+      name: 'cleaner-dashboard',
+      component: () => import('pages/cleaner/CleanerDashboard.vue'),
+    },
+    {
+      path: 'calendar',
+      name: 'cleaner-calendar',
+      component: () => import('pages/cleaner/CleanerCalendar.vue'),
+    },
+    {
+      path: 'active-job',
+      name: 'cleaner-active-job',
+      component: () => import('pages/cleaner/CleanerActiveJob.vue'),
+    },
+    {
+      path: 'profile',
+      name: 'cleaner-profile',
+      component: () => import('pages/cleaner/CleanerProfile.vue'),
+    },
+  ],
+})
 
-// --- ADMIN & 404 ---
+// --- ADMIN ---
 routes.push({
   path: '/admin',
   component: () => import('layouts/AdminLayout.vue'),
@@ -68,6 +75,13 @@ routes.push({
   ],
 })
 
+// --- GLOBALNI REDIRECT ZA ROOT ---
+routes.push({
+  path: '/',
+  redirect: '/auth/login',
+})
+
+// --- UVIJEK NA KRAJU (Samo jedan 404 catch-all!!!) ---
 routes.push({
   path: '/:catchAll(.*)*',
   component: () => import('pages/ErrorNotFound.vue'),
