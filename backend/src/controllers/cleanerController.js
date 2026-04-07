@@ -36,3 +36,33 @@ export const getAllCleaners = async (req, res) => {
     res.status(500).json({ poruka: 'Greška pri dohvaćanju čistača' })
   }
 }
+
+export const getCleanerStats = async (req, res) => {
+  const userId = req.user.id // Dobivamo iz authMiddleware-a
+  try {
+    const [rows] = await db.execute(
+      `SELECT
+        COUNT(*) as ukupno_poslova,
+        IFNULL(SUM(ukupna_cijena), 0) as ukupna_zarada,
+        IFNULL(SUM(kvadratura * 0.2), 0) as ukupno_sati -- Okvirna procjena sati
+       FROM Bookings
+       WHERE cleaner_id = ? AND status = 'completed'`,
+      [userId],
+    )
+    res.json(rows[0])
+  } catch (error) {
+    res.status(500).json({ poruka: 'Greška pri dohvaćanju statistike', detalji: error.message })
+  }
+}
+
+// GET /api/cleaners/calendar (Dohvaćanje smjena)
+export const getAvailability = async (req, res) => {
+  const userId = req.user.id
+  try {
+    const [rows] = await db.execute('SELECT * FROM Availability WHERE cleaner_id = ?', [userId])
+    res.json(rows)
+    // eslint-disable-next-line no-unused-vars
+  } catch (error) {
+    res.status(500).json({ poruka: 'Greška pri dohvaćanju kalendara' })
+  }
+}

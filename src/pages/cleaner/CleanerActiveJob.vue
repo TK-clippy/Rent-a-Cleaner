@@ -9,94 +9,134 @@
       class="q-mb-md q-px-none"
     />
 
-    <div class="text-h5 text-weight-bold q-mb-md">Detalji čišćenja</div>
+    <div v-if="loading" class="flex flex-center q-mt-xl">
+      <q-spinner color="primary" size="3em" />
+    </div>
 
-    <q-card class="q-mb-md bg-grey-1">
-      <q-card-section>
-        <div class="text-subtitle1 text-weight-bold">Marko Klijentović</div>
-        <div class="row items-center text-grey-8 q-mt-xs">
-          <q-icon name="place" size="18px" class="q-mr-xs text-primary" />
-          <span>Trg Bana Jelačića 12, 51000 Rijeka</span>
-        </div>
+    <div v-else-if="posao">
+      <div class="row justify-between items-center q-mb-md">
+        <div class="text-h5 text-weight-bold">Detalji čišćenja</div>
+        <q-chip :color="posao.status === 'completed' ? 'positive' : 'info'" text-color="white">
+          {{ posao.status === 'completed' ? 'Završeno' : 'Na čekanju' }}
+        </q-chip>
+      </div>
 
-        <q-separator class="q-my-md" />
+      <q-card class="q-mb-md bg-grey-1 shadow-2">
+        <q-card-section>
+          <div class="text-subtitle1 text-weight-bold">{{ posao.klijent_ime }}</div>
+          <div class="row items-center text-grey-8 q-mt-xs">
+            <q-icon name="place" size="18px" class="q-mr-xs text-primary" />
+            <span>{{ posao.adresa || 'Adresa nije poznata' }}</span>
+          </div>
 
-        <div class="row justify-around">
-          <q-btn flat color="primary" icon="call" label="Nazovi" class="column items-center" />
-          <q-btn flat color="primary" icon="chat" label="Poruka" class="column items-center" />
-          <q-btn flat color="primary" icon="directions" label="Karta" class="column items-center" />
-        </div>
-      </q-card-section>
-    </q-card>
+          <div class="row items-center text-grey-8 q-mt-xs">
+            <q-icon name="payments" size="18px" class="q-mr-xs text-positive" />
+            <span class="text-weight-bold">{{ posao.ukupna_cijena }} €</span>
+          </div>
 
-    <q-card class="q-mb-auto">
-      <q-card-section>
-        <div class="text-subtitle2 text-grey-7 q-mb-xs">Napomena klijenta:</div>
-        <div class="bg-amber-1 q-pa-sm rounded-borders text-dark">
-          "Molim vas pazite na stakleni stol u dnevnom boravku. Ključ je ispod otirača."
-        </div>
+          <q-separator class="q-my-md" />
 
-        <q-separator class="q-my-md" />
+          <div class="row justify-around">
+            <q-btn flat color="primary" icon="call" label="Nazovi" class="column items-center" />
+            <q-btn
+              flat
+              color="primary"
+              icon="directions"
+              label="Karta"
+              class="column items-center"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
 
-        <div class="text-subtitle2 text-grey-7 q-mb-xs">Zadaci:</div>
-        <q-list dense>
-          <q-item tag="label" v-ripple>
-            <q-item-section side><q-checkbox v-model="zadaci[0]" /></q-item-section>
-            <q-item-section>Usisavanje i pranje podova (50m²)</q-item-section>
-          </q-item>
-          <q-item tag="label" v-ripple>
-            <q-item-section side><q-checkbox v-model="zadaci[1]" /></q-item-section>
-            <q-item-section>Brisanje prašine</q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
+      <q-card class="q-mb-auto shadow-2">
+        <q-card-section>
+          <div class="text-subtitle2 text-grey-7 q-mb-xs">Usluga:</div>
+          <div class="text-weight-bold q-mb-md">{{ posao.usluga_ime }}</div>
 
-    <div class="q-mt-xl q-mb-md">
-      <q-btn
-        v-if="!posaoZapoceo"
-        color="primary"
-        class="full-width text-weight-bold"
-        size="xl"
-        label="ZAPOČNI ČIŠĆENJE"
-        @click="posaoZapoceo = true"
-      />
-      <q-btn
-        v-else
-        color="negative"
-        class="full-width text-weight-bold"
-        size="xl"
-        label="ZAVRŠI POSAO"
-        @click="zavrsiPosao"
-      />
+          <template v-if="posao.napomena">
+            <div class="text-subtitle2 text-grey-7 q-mb-xs">Napomena klijenta:</div>
+            <div class="bg-amber-1 q-pa-sm rounded-borders text-dark">"{{ posao.napomena }}"</div>
+          </template>
+        </q-card-section>
+      </q-card>
+
+      <div class="q-mt-xl q-mb-md" v-if="posao.status !== 'completed'">
+        <q-btn
+          v-if="!posaoZapoceo"
+          color="primary"
+          class="full-width text-weight-bold shadow-3"
+          size="xl"
+          label="ZAPOČNI ČIŠĆENJE"
+          @click="posaoZapoceo = true"
+        />
+        <q-btn
+          v-else
+          color="negative"
+          class="full-width text-weight-bold shadow-3"
+          size="xl"
+          label="ZAVRŠI POSAO"
+          @click="zavrsiPosao"
+          :loading="zavrsavanje"
+        />
+      </div>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { api } from 'boot/axios'
 
 const router = useRouter()
+const route = useRoute()
 const $q = useQuasar()
 
+const posao = ref(null)
+const loading = ref(true)
 const posaoZapoceo = ref(false)
-const zadaci = ref([false, false])
+const zavrsavanje = ref(false)
+
+const ucitajPosao = async () => {
+  loading.value = true
+  try {
+    // Dohvaćamo točno ovaj posao po ID-u iz URL-a
+    const res = await api.get(`/bookings/${route.query.id}`)
+    posao.value = res.data
+  } catch (error) {
+    console.error('Greška pri učitavanju posla:', error)
+    $q.notify({ color: 'negative', message: 'Nije moguće učitati detalje posla.' })
+  } finally {
+    loading.value = false
+  }
+}
 
 const zavrsiPosao = () => {
   $q.dialog({
     title: 'Potvrda',
-    message: 'Jeste li sigurni da ste završili sve zadatke i želite naplatiti posao?',
+    message: 'Jeste li sigurni da ste završili posao i želite ga označiti kao gotovog?',
     cancel: true,
     persistent: true,
-  }).onOk(() => {
-    $q.notify({
-      color: 'positive',
-      message: 'Posao uspješno završen! Klijent je obaviješten.',
-      icon: 'done_all',
-    })
-    router.push({ name: 'cleaner-dashboard' })
+  }).onOk(async () => {
+    zavrsavanje.value = true
+    try {
+      // Šaljemo backendu da je gotovo
+      await api.put(`/bookings/${posao.value.id}/status`, { status: 'completed' })
+
+      $q.notify({ color: 'positive', message: 'Posao uspješno završen!', icon: 'done_all' })
+      router.push({ name: 'cleaner-dashboard' })
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      $q.notify({ color: 'negative', message: 'Greška pri završetku posla.' })
+    } finally {
+      zavrsavanje.value = false
+    }
   })
 }
+
+onMounted(() => {
+  if (route.query.id) ucitajPosao()
+})
 </script>
