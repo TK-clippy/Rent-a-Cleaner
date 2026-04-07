@@ -70,7 +70,14 @@
               no-caps
               @click="otkaziRezervaciju(res.id)"
             />
-            <q-btn flat color="primary" label="Kontaktiraj" icon="chat" no-caps />
+            <q-btn
+              flat
+              color="primary"
+              label="Kontaktiraj"
+              icon="chat"
+              no-caps
+              @click="kontaktiraj(res)"
+            />
           </q-card-actions>
         </q-card>
       </q-tab-panel>
@@ -270,6 +277,35 @@ const otkaziRezervaciju = (id) => {
       console.error(err)
       $q.notify({ color: 'negative', message: 'Greška pri otkazivanju' })
     }
+  })
+}
+const kontaktiraj = (rezervacija) => {
+  // Ovisno tko gleda, uzimamo prava imena i podatke
+  const ime = rezervacija.cistac_ime || rezervacija.klijent_ime
+  const email = rezervacija.cistac_email || rezervacija.klijent_email || 'Nije dostupno'
+  const telefon = rezervacija.cistac_telefon || rezervacija.klijent_telefon || 'Nije dostupno'
+
+  $q.dialog({
+    title: `Kontaktiraj: ${ime}`,
+    // Koristimo HTML kako bismo napravili klikabilne linkove za mail i poziv
+    message: `
+      <div class="q-mt-md">
+        <div class="q-mb-sm">
+          <q-icon name="email" color="primary" size="sm" class="q-mr-sm" />
+          <a href="mailto:${email}" style="text-decoration: none; color: #1976D2; font-size: 16px;">${email}</a>
+        </div>
+        <div>
+          <q-icon name="phone" color="primary" size="sm" class="q-mr-sm" />
+          <a href="tel:${telefon}" style="text-decoration: none; color: #1976D2; font-size: 16px;">${telefon}</a>
+        </div>
+      </div>
+    `,
+    html: true,
+    ok: {
+      label: 'Zatvori',
+      color: 'grey-7',
+      flat: true,
+    },
   })
 }
 </script>
