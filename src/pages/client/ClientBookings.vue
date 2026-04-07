@@ -45,16 +45,18 @@
                 size="sm"
                 class="text-weight-bold"
               >
-                {{ res.status.toUpperCase() }}
+                {{ res.status ? res.status.toUpperCase() : 'NA ČEKANJU' }}
               </q-chip>
               <div class="text-caption text-weight-medium text-primary">
-                {{ formatirajDatum(res.datum_rezervacije) }} u
-                {{ res.vrijeme_rezervacije.substring(0, 5) }}h
+                {{ formatirajDatum(res.datum_ciscenja) }} u
+                {{ res.vrijeme_pocetka ? res.vrijeme_pocetka.substring(0, 5) : '' }}h
               </div>
             </div>
+
             <div class="text-subtitle1 text-weight-bold">
-              {{ res.usluga_naziv }} - {{ res.cistac_ime }} {{ res.cistac_prezime }}
+              {{ res.usluga_ime }} - {{ res.cistac_ime }}
             </div>
+
             <div class="text-body2 text-grey-7">
               <q-icon name="place" /> {{ res.adresa || 'Adresa nije navedena' }}
             </div>
@@ -81,14 +83,18 @@
         >
           <q-card-section>
             <div class="row justify-between items-center q-mb-sm">
-              <q-chip color="grey-7" text-color="white" size="sm">{{ res.status }}</q-chip>
+              <q-chip color="grey-7" text-color="white" size="sm">
+                {{ res.status }}
+              </q-chip>
               <div class="text-caption text-grey-7">
-                {{ formatirajDatum(res.datum_rezervacije) }}
+                {{ formatirajDatum(res.datum_ciscenja) }}
               </div>
             </div>
+
             <div class="text-subtitle1 text-weight-bold">
-              {{ res.usluga_naziv }} - {{ res.cistac_ime }}
+              {{ res.usluga_ime }} - {{ res.cistac_ime }}
             </div>
+
             <div class="text-body2 text-grey-9 text-weight-medium">
               Ukupno plaćeno: {{ res.ukupna_cijena }} €
             </div>
@@ -155,13 +161,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { api } from 'boot/axios'
 import { useQuasar } from 'quasar'
+import { useAuthStore } from 'stores/auth'
 
 const $q = useQuasar()
+const auth = useAuthStore()
 const tab = ref('aktivne')
 const loading = ref(true)
 const rezervacije = ref([])
 
-// State za recenziju
 const otvoriRecenziju = ref(false)
 const odabranaRezervacija = ref(null)
 const slanjeRecenzije = ref(false)
@@ -170,15 +177,14 @@ const novaRecenzija = ref({
   komentar: '',
 })
 
-// Dohvat rezervacija iz baze
 const ucitajRezervacije = async () => {
   loading.value = true
   try {
-    // NAPOMENA: Ovdje koristimo user_id = 1 dok ne spojimo Login/Pinia store
-    const res = await api.get('/bookings/user/1')
-    rezervacije.value = res.data
-    // eslint-disable-next-line no-unused-vars
+    const res = await api.get('/bookings/my-bookings')
+    console.log('REZERVACIJE:', res.data) // ← DODAJ OVO
+    rezervacije.value = Array.isArray(res.data) ? res.data : []
   } catch (err) {
+    console.error(err)
     $q.notify({ color: 'negative', message: 'Greška pri učitavanju rezervacija' })
   } finally {
     loading.value = false
@@ -189,24 +195,23 @@ onMounted(() => {
   ucitajRezervacije()
 })
 
-// Filtriranje na temelju taba (Aktivne vs Povijest)
 const filtriraneRezervacije = computed(() => {
   if (tab.value === 'aktivne') {
-    return rezervacije.value.filter((r) => ['pending', 'confirmed'].includes(r.status))
+    return rezervacije.value.filter((r) =>
+      ['pending', 'confirmed', 'Na čekanju', 'Potvrđeno'].includes(r.status),
+    )
   } else {
     return rezervacije.value.filter((r) => ['completed', 'cancelled'].includes(r.status))
   }
 })
 
-// Pomoćne funkcije
 const getStatusColor = (status) => {
-  const colors = {
-    pending: 'orange',
-    confirmed: 'info',
-    completed: 'positive',
-    cancelled: 'negative',
-  }
-  return colors[status] || 'grey'
+  const s = status ? status.toLowerCase() : ''
+  if (s === 'pending' || s === 'na čekanju') return 'orange'
+  if (s === 'confirmed' || s === 'potvrđeno') return 'info'
+  if (s === 'completed' || s === 'dovršeno') return 'positive'
+  if (s === 'cancelled' || s === 'otkazano') return 'negative'
+  return 'grey'
 }
 
 const formatirajDatum = (isoString) => {
@@ -217,7 +222,6 @@ const formatirajDatum = (isoString) => {
   })
 }
 
-// Logika recenziranja
 const pripremiRecenziju = (res) => {
   odabranaRezervacija.value = res
   novaRecenzija.value = { ocjena: 5, komentar: '' }
@@ -235,23 +239,22 @@ const posaljiRecenziju = async () => {
     await api.post('/cleaners/reviews', {
       booking_id: odabranaRezervacija.value.id,
       cleaner_id: odabranaRezervacija.value.cleaner_id,
-      user_id: 1, // Privremeno dok nema Autha
+      user_id: auth.user?.id,
       ocjena: novaRecenzija.value.ocjena,
       komentar: novaRecenzija.value.komentar,
     })
 
     $q.notify({ color: 'positive', message: 'Hvala na recenziji!' })
     otvoriRecenziju.value = false
-    ucitajRezervacije() // Osvježi listu da se vidi da je recenzirano
-    // eslint-disable-next-line no-unused-vars
+    ucitajRezervacije()
   } catch (err) {
+    console.error(err)
     $q.notify({ color: 'negative', message: 'Greška pri slanju recenzije' })
   } finally {
     slanjeRecenzije.value = false
   }
 }
 
-// eslint-disable-next-line no-unused-vars
 const otkaziRezervaciju = (id) => {
   $q.dialog({
     title: 'Otkaži rezervaciju',
@@ -260,10 +263,11 @@ const otkaziRezervaciju = (id) => {
     persistent: true,
   }).onOk(async () => {
     try {
-      // Ovdje bi išao API poziv api.patch(`/bookings/${id}/cancel`)
-      $q.notify({ color: 'info', message: 'Zahtjev za otkazivanjem je poslan' })
-      // eslint-disable-next-line no-unused-vars
+      await api.patch(`/bookings/${id}/cancel`)
+      $q.notify({ color: 'positive', message: 'Rezervacija uspješno otkazana' })
+      ucitajRezervacije()
     } catch (err) {
+      console.error(err)
       $q.notify({ color: 'negative', message: 'Greška pri otkazivanju' })
     }
   })

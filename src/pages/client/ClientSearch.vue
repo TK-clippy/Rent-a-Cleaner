@@ -77,6 +77,7 @@ const ucitajCistace = async () => {
   try {
     const res = await api.get('/cleaners')
     const data = Array.isArray(res.data) ? res.data : []
+    console.log('SEARCH CISTACI:', data)
 
     cistaci.value = data.map((c) => {
       const parts = c.ime_prezime ? c.ime_prezime.split(' ') : ['Nepoznato']
@@ -89,11 +90,7 @@ const ucitajCistace = async () => {
         ocjena: c.prosjecna_ocjena || '—',
         recenzije: c.broj_recenzija || 0,
 
-        usluge: Array.isArray(c.usluge)
-          ? c.usluge
-          : typeof c.usluge === 'string'
-            ? c.usluge.split(',')
-            : [],
+        usluge: typeof c.usluge === 'string' && c.usluge ? c.usluge.split(', ') : [],
 
         slika:
           c.avatar ||
