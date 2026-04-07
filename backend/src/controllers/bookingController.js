@@ -45,29 +45,32 @@ export const getMyBookings = async (req, res) => {
   try {
     let query = ''
     if (rola === 'cleaner') {
+      // Dodani klijent_email i klijent_telefon
       query = `
         SELECT
           b.*,
           s.naziv as usluga_ime,
-          u.ime_prezime as klijent_ime
+          u.ime_prezime as klijent_ime,
+          u.email as klijent_email,
+          u.telefon as klijent_telefon
         FROM Bookings b
         JOIN Services s ON b.service_id = s.id
         JOIN Users u ON b.client_id = u.id
-        /* PROMIJENJENO: spajamo na user_id umjesto na id */
         JOIN Cleaner_Profiles cp ON b.cleaner_id = cp.user_id
         WHERE cp.user_id = ?
         ORDER BY b.datum_ciscenja DESC
       `
     } else {
+      // Dodani cistac_email i cistac_telefon
       query = `
         SELECT
           b.*,
           s.naziv as usluga_ime,
-          u.ime_prezime as cistac_ime
+          u.ime_prezime as cistac_ime,
+          u.email as cistac_email,
+          u.telefon as cistac_telefon
         FROM Bookings b
         LEFT JOIN Services s ON b.service_id = s.id
-        /* PROMIJENJENO: pretpostavljamo da Bookings.cleaner_id pokazuje na Users.id
-           ili na Cleaner_Profiles.user_id */
         LEFT JOIN Cleaner_Profiles cp ON b.cleaner_id = cp.user_id
         LEFT JOIN Users u ON cp.user_id = u.id
         WHERE b.client_id = ?
@@ -78,7 +81,6 @@ export const getMyBookings = async (req, res) => {
     const [rows] = await db.execute(query, [userId])
     res.json(rows)
   } catch (error) {
-    console.error('SQL GREŠKA:', error.message)
     res.status(500).json({ poruka: 'Greška u bazi', detalji: error.message })
   }
 }
