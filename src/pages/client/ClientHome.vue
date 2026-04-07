@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
       <div>
-        <div class="text-h5 text-weight-bold">Pozdrav, Marko!</div>
+        <div class="text-h5 text-weight-bold">Pozdrav, {{ imeKorisnika }}!</div>
         <div class="text-subtitle2 text-grey-7">Što čistimo danas?</div>
       </div>
       <q-btn round flat icon="notifications" color="grey-7">
@@ -30,71 +30,90 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-// Uvozimo naše nove komponente
+import { useAuthStore } from 'stores/auth'
+import { api } from 'boot/axios'
 import ServiceCategory from 'components/ServiceCategory.vue'
 import CleanerCard from 'components/CleanerCard.vue'
 
 const router = useRouter()
+const auth = useAuthStore()
 
-// Kategorije s Unsplash slikama za moderniji izgled
-const kategorije = ref([
-  {
-    id: 'generalno',
-    naziv: 'Osnovno',
-    slika:
-      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop',
-  },
-  {
-    id: 'dubinsko',
-    naziv: 'Dubinsko',
-    slika:
-      'https://images.unsplash.com/photo-1558317374-067fb5f30001?q=80&w=400&auto=format&fit=crop',
-  },
-  {
-    id: 'gradjevina',
-    naziv: 'Nakon radova',
-    slika:
-      'https://images.unsplash.com/photo-1505798577917-a65157d3320a?q=80&w=400&auto=format&fit=crop',
-  },
-  {
-    id: 'bazeni',
-    naziv: 'Bazeni',
-    slika:
-      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=400&auto=format&fit=crop',
-  },
-])
+const imeKorisnika = computed(() => {
+  const puno = auth.user?.ime_prezime || 'Korisnik'
+  return puno.split(' ')[0]
+})
 
-const preporuceniCistaci = ref([
-  {
-    id: 1001,
-    ime: 'Ana',
-    prezime: 'Perić',
-    slika: 'https://cdn.quasar.dev/img/avatar2.jpg',
-    ocjena: 4.9,
-    recenzije: 120,
-    cijena: 15,
-    usluge: ['Osnovno', 'Peglanje'],
-  },
-  {
-    id: 1002,
-    ime: 'Ivan',
-    prezime: 'Horvat',
-    slika: 'https://cdn.quasar.dev/img/avatar1.jpg',
-    ocjena: 4.8,
-    recenzije: 85,
-    cijena: 18,
-    usluge: ['Dubinsko', 'Prozori'],
-  },
-])
+const kategorije = ref([])
+const preporuceniCistaci = ref([])
+
+// Fallback slike ako baza nema slika_url
+const slikeUsluga = {
+  'Osnovno čišćenje':
+    'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop',
+  'Dubinsko čišćenje':
+    'https://images.unsplash.com/photo-1558317374-067fb5f30001?q=80&w=400&auto=format&fit=crop',
+  'Nakon radova':
+    'https://images.unsplash.com/photo-1505798577917-a65157d3320a?q=80&w=400&auto=format&fit=crop',
+  Bazeni:
+    'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=400&auto=format&fit=crop',
+}
+
+const ucitajPodatke = async () => {
+  try {
+    const resServices = await api.get('/cleaners/services')
+    const services = Array.isArray(resServices.data) ? resServices.data : []
+
+    // Deduplikacija po nazivu
+    const unique = services.filter(
+      (u, index, self) => index === self.findIndex((s) => s.naziv === u.naziv),
+    )
+
+    kategorije.value = unique.map((u) => ({
+      id: u.id,
+      naziv: u.naziv,
+      // Koristi slika_url iz baze, pa fallback po nazivu, pa generički fallback
+      slika:
+        u.slika_url ||
+        slikeUsluga[u.naziv] ||
+        'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=400',
+    }))
+  } catch (err) {
+    console.error('Greška services:', err)
+    kategorije.value = []
+  }
+
+  try {
+    const resCleaners = await api.get('/cleaners')
+    const cleaners = Array.isArray(resCleaners.data) ? resCleaners.data : []
+
+    preporuceniCistaci.value = cleaners.slice(0, 3).map((c) => ({
+      id: c.id,
+      ime: c.ime_prezime.split(' ')[0],
+      prezime: c.ime_prezime.split(' ').slice(1).join(' '),
+      cijena: c.cijena_po_satu || '—',
+      ocjena: c.prosjecna_ocjena || '—',
+      brojRecenzija: c.broj_recenzija || 0,
+      avatar:
+        c.avatar ||
+        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(c.ime_prezime)}`,
+    }))
+  } catch (err) {
+    console.error('Greška cleaners:', err)
+    preporuceniCistaci.value = []
+  }
+}
+
+onMounted(() => {
+  ucitajPodatke()
+})
 
 const odaberiKategoriju = (usluga) => {
   router.push({ name: 'client-search', query: { tip: usluga.id } })
 }
 
 const vidiProfil = (id) => {
-  // Za sada šaljemo na search, kasnije na detaljni profil
   router.push({ name: 'client-search', query: { selected: id } })
 }
 </script>

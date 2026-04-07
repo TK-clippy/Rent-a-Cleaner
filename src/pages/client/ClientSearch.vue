@@ -40,7 +40,9 @@
               <div class="text-subtitle1 text-weight-bold">
                 {{ cistac.ime }} {{ cistac.prezime }}
               </div>
-              <div class="text-caption text-grey-7">{{ cistac.usluge.join(', ') }}</div>
+              <div class="text-caption text-grey-7" v-if="cistac.usluge && cistac.usluge.length">
+                {{ cistac.usluge.join(', ') }}
+              </div>
               <div class="row items-center q-mt-xs">
                 <q-icon name="star" color="accent" size="18px" />
                 <span class="text-weight-bold q-ml-xs">{{ cistac.ocjena }}</span>
@@ -61,59 +63,75 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { api } from 'boot/axios'
 
 const router = useRouter()
 const searchQuery = ref('')
 const odabraniFilter = ref('Sve')
-const filteri = ['Sve', 'Generalno', 'Dubinsko', 'Peglanje']
+const filteri = ref(['Sve']) // Počinjemo samo sa 'Sve'
+const cistaci = ref([])
 
-const cistaci = ref([
-  {
-    id: 1,
-    ime: 'Ana',
-    prezime: 'Perić',
-    slika: 'https://cdn.quasar.dev/img/avatar1.jpg',
-    ocjena: 4.9,
-    recenzije: 120,
-    cijena: 15,
-    usluge: ['Generalno', 'Peglanje'],
-  },
-  {
-    id: 2,
-    ime: 'Ivan',
-    prezime: 'Horvat',
-    slika: 'https://cdn.quasar.dev/img/avatar2.jpg',
-    ocjena: 4.7,
-    recenzije: 85,
-    cijena: 18,
-    usluge: ['Dubinsko', 'Generalno'],
-  },
-  {
-    id: 3,
-    ime: 'Marija',
-    prezime: 'Kovač',
-    slika: 'https://cdn.quasar.dev/img/avatar3.jpg',
-    ocjena: 5.0,
-    recenzije: 42,
-    cijena: 20,
-    usluge: ['Dubinsko', 'Bazeni'],
-  },
-])
+const ucitajCistace = async () => {
+  try {
+    const res = await api.get('/cleaners')
+    const data = Array.isArray(res.data) ? res.data : []
+
+    cistaci.value = data.map((c) => {
+      const parts = c.ime_prezime ? c.ime_prezime.split(' ') : ['Nepoznato']
+
+      return {
+        id: c.id,
+        ime: parts[0],
+        prezime: parts.slice(1).join(' '),
+        cijena: c.cijena_po_satu || '—',
+        ocjena: c.prosjecna_ocjena || '—',
+        recenzije: c.broj_recenzija || 0,
+
+        usluge: Array.isArray(c.usluge)
+          ? c.usluge
+          : typeof c.usluge === 'string'
+            ? c.usluge.split(',')
+            : [],
+
+        slika:
+          c.avatar ||
+          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(c.ime_prezime)}`,
+      }
+    })
+
+    // FILTERI (isto kao prije ali sigurnije)
+    const sveUsluge = new Set(['Sve'])
+    cistaci.value.forEach((c) => {
+      c.usluge.forEach((u) => sveUsluge.add(u))
+    })
+
+    filteri.value = Array.from(sveUsluge)
+  } catch (err) {
+    console.error('Greška:', err)
+    cistaci.value = []
+  }
+}
+
+onMounted(() => {
+  ucitajCistace()
+})
 
 const filtriraniCistaci = computed(() => {
   return cistaci.value.filter((c) => {
-    const matchesSearch = c.ime.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesFilter = odabraniFilter.value === 'Sve' || c.usluge.includes(odabraniFilter.value)
+    const imePrezime = `${c.ime} ${c.prezime}`.toLowerCase()
+    const matchesSearch = imePrezime.includes(searchQuery.value.toLowerCase())
+
+    const matchesFilter =
+      odabraniFilter.value === 'Sve' ||
+      (Array.isArray(c.usluge) && c.usluge.includes(odabraniFilter.value))
+
     return matchesSearch && matchesFilter
   })
 })
 
 const rezerviraj = (cistac) => {
-  // Sada koristimo 'cistac' pa ESLint neće javljati grešku
-  console.log('Rezervacija za:', cistac.ime)
-
   router.push({
     name: 'client-checkout',
     query: { id: cistac.id },

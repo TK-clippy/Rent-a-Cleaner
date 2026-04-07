@@ -32,6 +32,7 @@ export default defineConfig((ctx) => {
 
       env: {
         APP_MODE: process.env.APP_MODE || 'client',
+        BUILD_TARGET: process.env.BUILD_TARGET || 'client',
       },
 
       vueRouterMode: 'hash',
@@ -53,7 +54,7 @@ export default defineConfig((ctx) => {
 
     framework: {
       config: {},
-      plugins: [],
+      plugins: ['Notify',],
     },
 
     animations: [],
