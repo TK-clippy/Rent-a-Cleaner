@@ -36,6 +36,12 @@ routes.push({
   component: () => import('pages/auth/UserLogin.vue'),
 })
 
+routes.push({
+  path: '/auth/register',
+  name: 'register',
+  component: () => import('pages/auth/UserRegister.vue'),
+})
+
 // --- ČISTAČ (Partner Portal) ---
 routes.push({
   path: '/cleaner',
