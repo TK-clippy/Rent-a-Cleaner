@@ -12,31 +12,32 @@ export const registerUser = async (req, res) => {
   const { ime_prezime, email, lozinka, telefon, uloga } = req.body
 
   try {
-    // 1. Provjera postoji li već korisnik
     const [existingUsers] = await db.execute('SELECT email FROM Users WHERE email = ?', [email])
     if (existingUsers.length > 0) {
       return res.status(400).json({ poruka: 'Korisnik s ovim emailom već postoji.' })
     }
 
-    // 2. Hashiranje lozinke
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(lozinka, salt)
 
-    // 3. Spremanje korisnika
-    const rola = uloga === 'cleaner' ? 'cleaner' : 'client' // Default je client
+    // POPRAVAK: Dozvoljavamo admina, fallback je client
+    const allowedRoles = ['client', 'cleaner', 'admin']
+    const rola = allowedRoles.includes(uloga) ? uloga : 'client'
+
+    // POPRAVAK: Zaštita od undefined vrijednosti
+    const siguranTelefon = telefon || null
+
     const [result] = await db.execute(
       'INSERT INTO Users (ime_prezime, email, lozinka_hash, telefon, uloga) VALUES (?, ?, ?, ?, ?)',
-      [ime_prezime, email, hashedPassword, telefon, rola],
+      [ime_prezime, email, hashedPassword, siguranTelefon, rola],
     )
 
     const newUserId = result.insertId
 
-    // 4. Ako je čistač, kreiraj mu prazan profil u Cleaner_Profiles
     if (rola === 'cleaner') {
       await db.execute('INSERT INTO Cleaner_Profiles (user_id) VALUES (?)', [newUserId])
     }
 
-    // 5. Vraćanje odgovora s tokenom
     res.status(201).json({
       id: newUserId,
       ime_prezime,

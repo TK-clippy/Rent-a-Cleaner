@@ -1,7 +1,7 @@
 // Za sada zanemarujemo APP_MODE kako bismo testirali rade li sve rute ispravno.
 const routes = []
 
-// --- KLIJENT ---
+// --- KLIJENT (Client Portal) ---
 routes.push({
   path: '/client',
   component: () => import('layouts/ClientLayout.vue'),
@@ -36,7 +36,7 @@ routes.push({
   component: () => import('pages/auth/UserLogin.vue'),
 })
 
-// --- ČISTAČ ---
+// --- ČISTAČ (Partner Portal) ---
 routes.push({
   path: '/cleaner',
   component: () => import('layouts/CleanerLayout.vue'),
@@ -64,14 +64,40 @@ routes.push({
   ],
 })
 
-// --- ADMIN ---
+// --- ADMIN (Control Panel) ---
 routes.push({
   path: '/admin',
   component: () => import('layouts/AdminLayout.vue'),
   children: [
-    { path: '', name: 'admin-metrics', component: () => import('pages/admin/AdminMetrics.vue') },
-    { path: 'users', name: 'admin-users', component: () => import('pages/admin/AdminUsers.vue') },
-    { path: 'chat', name: 'admin-chat', component: () => import('pages/admin/AdminChat.vue') },
+    {
+      path: '',
+      redirect: 'dashboard'
+    },
+    {
+      path: 'dashboard',
+      name: 'admin-dashboard',
+      component: () => import('pages/admin/AdminMetrics.vue') // Metrics služi kao dashboard
+    },
+    {
+      path: 'users',
+      name: 'admin-users',
+      component: () => import('pages/admin/AdminUsers.vue')
+    },
+    {
+      path: 'chat',
+      name: 'admin-chat',
+      component: () => import('pages/admin/AdminChat.vue')
+    },
+    {
+      path: 'services',
+      name: 'admin-services',
+      component: () => import('pages/ErrorNotFound.vue')
+    },
+    {
+      path: 'bookings',
+      name: 'admin-bookings',
+      component: () => import('pages/ErrorNotFound.vue')
+    }
   ],
 })
 
@@ -81,7 +107,7 @@ routes.push({
   redirect: '/auth/login',
 })
 
-// --- UVIJEK NA KRAJU (Samo jedan 404 catch-all!!!) ---
+// --- UVIJEK NA KRAJU (404 catch-all) ---
 routes.push({
   path: '/:catchAll(.*)*',
   component: () => import('pages/ErrorNotFound.vue'),

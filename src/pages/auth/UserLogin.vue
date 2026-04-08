@@ -101,46 +101,42 @@ const handleLogin = async () => {
 
   loading.value = true
 
-  let res
-
   try {
-    res = await auth.login(credentials.value)
-  } catch (err) {
-    console.error('Login error:', err)
-    $q.notify({
-      color: 'negative',
-      message: 'Greška u komunikaciji sa serverom.',
-    })
-    loading.value = false
-    return
-  }
+    const res = await auth.login(credentials.value)
 
-  if (res && res.success) {
-    $q.notify({
-      color: 'positive',
-      message: 'Uspješno ste ulogirani!',
-    })
+    if (res && res.success) {
+      // PROVJERA: Uzimamo ulogu iz store-a jer je tamo sigurno spremljena
+      const pravaUloga = auth.user?.uloga
+      console.log('Uspješan login. Uloga u sustavu:', pravaUloga)
 
-    const target = process.env.BUILD_TARGET || 'client'
+      $q.notify({
+        color: 'positive',
+        message: `Dobrodošli, ${auth.user?.ime_prezime || 'korisniče'}!`,
+        icon: 'check_circle',
+      })
 
-    try {
-      if (target === 'cleaner') {
+      // STROGO PREUSMJERAVANJE NA TEMELJU ULOGE IZ BAZE
+      if (pravaUloga === 'admin') {
+        console.log('Navigiram na ADMIN panel...')
+        await router.push('/admin/dashboard')
+      } else if (pravaUloga === 'cleaner') {
+        console.log('Navigiram na CLEANER panel...')
         await router.push('/cleaner/dashboard')
-      } else if (target === 'admin') {
-        await router.push('/admin')
       } else {
+        console.log('Navigiram na CLIENT panel...')
         await router.push('/client/home')
       }
-    } catch (navErr) {
-      console.error('Router error:', navErr)
+    } else {
+      $q.notify({
+        color: 'negative',
+        message: res?.message || 'Neispravni podaci.',
+        icon: 'error',
+      })
     }
-  } else {
-    $q.notify({
-      color: 'negative',
-      message: res?.message || 'Neispravan email ili lozinka.',
-    })
+  } catch (err) {
+    console.error('Kritična greška u UserLogin:', err)
+  } finally {
+    loading.value = false
   }
-
-  loading.value = false
 }
 </script>

@@ -8,6 +8,7 @@ import db from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import cleanerRoutes from './routes/cleanerRoutes.js'
 import bookingRoutes from './routes/bookingRoutes.js'
+import adminRoutes from './routes/adminRoutes.js'
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/cleaners', cleanerRoutes)
 app.use('/api/bookings', bookingRoutes)
+app.use('/api/admin', adminRoutes)
 
 app.get('/', (req, res) => {
   res.send('Rent-A-Cleaner API is running...')
