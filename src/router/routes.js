@@ -65,39 +65,15 @@ routes.push({
 })
 
 // --- ADMIN (Control Panel) ---
+// --- ADMIN ---
 routes.push({
   path: '/admin',
   component: () => import('layouts/AdminLayout.vue'),
   children: [
-    {
-      path: '',
-      redirect: 'dashboard'
-    },
-    {
-      path: 'dashboard',
-      name: 'admin-dashboard',
-      component: () => import('pages/admin/AdminMetrics.vue') // Metrics služi kao dashboard
-    },
-    {
-      path: 'users',
-      name: 'admin-users',
-      component: () => import('pages/admin/AdminUsers.vue')
-    },
-    {
-      path: 'chat',
-      name: 'admin-chat',
-      component: () => import('pages/admin/AdminChat.vue')
-    },
-    {
-      path: 'services',
-      name: 'admin-services',
-      component: () => import('pages/ErrorNotFound.vue')
-    },
-    {
-      path: 'bookings',
-      name: 'admin-bookings',
-      component: () => import('pages/ErrorNotFound.vue')
-    }
+    { path: '', name: 'admin-dashboard', component: () => import('pages/admin/AdminDashboard.vue') },
+    { path: 'users', name: 'admin-users', component: () => import('pages/admin/AdminUsers.vue') },
+    { path: 'metrics', name: 'admin-metrics', component: () => import('pages/admin/AdminMetrics.vue') },
+    { path: 'chat', name: 'admin-chat', component: () => import('pages/admin/AdminChat.vue') },
   ],
 })
 
