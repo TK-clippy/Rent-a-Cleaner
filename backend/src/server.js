@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import userRoutes from './routes/userRoutes.js'
 // eslint-disable-next-line no-unused-vars
 import db from './config/db.js'
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/cleaners', cleanerRoutes)
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/users', userRoutes)
 
 app.get('/', (req, res) => {
   res.send('Rent-A-Cleaner API is running...')

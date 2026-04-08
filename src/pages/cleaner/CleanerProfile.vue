@@ -2,14 +2,17 @@
   <q-page class="q-pa-md bg-grey-1">
     <div class="column items-center q-mb-lg q-pt-md">
       <q-avatar size="100px" class="shadow-3 q-mb-md">
-        <img :src="auth.user?.avatar || 'https://cdn.quasar.dev/img/avatar2.jpg'" />
+        <img
+          :src="`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profil.ime_prezime || 'C')}`"
+        />
       </q-avatar>
-      <div class="text-h5 text-weight-bold">{{ auth.user?.ime_prezime || 'Profil Čistača' }}</div>
-      <div class="text-subtitle2 text-grey-7">Profesionalni partner</div>
-
+      <div class="text-h5 text-weight-bold">{{ profil.ime_prezime || 'Profil Čistača' }}</div>
+      <div class="text-subtitle2 text-grey-7">{{ profil.email }}</div>
       <div class="row items-center q-mt-sm bg-white q-px-md q-py-xs rounded-borders shadow-1">
         <q-icon name="star" color="warning" size="24px" />
-        <span class="text-h6 text-weight-bold q-ml-sm">4.9</span>
+        <span class="text-h6 text-weight-bold q-ml-sm">{{
+          Number(profil.prosjecna_ocjena || 0).toFixed(1)
+        }}</span>
         <span class="text-caption text-grey-6 q-ml-xs">(Ocjena)</span>
       </div>
     </div>
@@ -30,6 +33,45 @@
       </q-card-section>
     </q-card>
 
+    <div class="text-h6 text-weight-bold q-mb-sm">Uredi profil</div>
+    <q-card class="q-mb-lg shadow-2">
+      <q-card-section class="q-gutter-y-md">
+        <q-input v-model="forma.telefon" label="Telefon" filled rounded bg-color="white">
+          <template v-slot:prepend><q-icon name="phone" color="primary" /></template>
+        </q-input>
+        <q-input
+          v-model="forma.cijena_po_satu"
+          label="Cijena po satu (€)"
+          type="number"
+          filled
+          rounded
+          bg-color="white"
+        >
+          <template v-slot:prepend><q-icon name="euro" color="primary" /></template>
+        </q-input>
+        <q-input
+          v-model="forma.bio"
+          label="Bio / O meni"
+          type="textarea"
+          filled
+          rounded
+          bg-color="white"
+          autogrow
+        >
+          <template v-slot:prepend><q-icon name="edit" color="primary" /></template>
+        </q-input>
+        <q-btn
+          label="Spremi promjene"
+          color="primary"
+          rounded
+          unelevated
+          class="full-width"
+          :loading="spremanje"
+          @click="spremiProfil"
+        />
+      </q-card-section>
+    </q-card>
+
     <div class="text-h6 text-weight-bold q-mb-sm">Postavke</div>
     <q-list class="bg-white rounded-borders shadow-1">
       <q-item clickable v-ripple @click="$router.push({ name: 'cleaner-calendar' })">
@@ -40,9 +82,7 @@
         </q-item-section>
         <q-item-section side><q-icon name="chevron_right" /></q-item-section>
       </q-item>
-
       <q-separator />
-
       <q-item clickable v-ripple class="text-negative" @click="odjava">
         <q-item-section avatar><q-icon name="logout" color="negative" /></q-item-section>
         <q-item-section>Odjava s profila</q-item-section>
@@ -61,16 +101,42 @@ import { useQuasar } from 'quasar'
 const auth = useAuthStore()
 const router = useRouter()
 const $q = useQuasar()
+
+const profil = ref({})
 const stats = ref({ ukupno_poslova: 0, ukupna_zarada: 0 })
+const spremanje = ref(false)
+const forma = ref({ telefon: '', cijena_po_satu: '', bio: '' })
 
 onMounted(async () => {
   try {
-    const res = await api.get('/cleaners/stats')
-    stats.value = res.data
+    const [resProfil, resStats] = await Promise.all([
+      api.get('/cleaners/profile'),
+      api.get('/cleaners/stats'),
+    ])
+    profil.value = resProfil.data
+    stats.value = resStats.data
+    forma.value = {
+      telefon: resProfil.data.telefon || '',
+      cijena_po_satu: resProfil.data.cijena_po_satu || '',
+      bio: resProfil.data.bio || '',
+    }
   } catch (err) {
-    console.error('Greška pri dohvaćanju statistike', err)
+    console.error('Greška pri dohvaćanju profila', err)
   }
 })
+
+const spremiProfil = async () => {
+  spremanje.value = true
+  try {
+    await api.put('/cleaners/profile', forma.value)
+    $q.notify({ color: 'positive', message: 'Profil uspješno ažuriran!' })
+    // eslint-disable-next-line no-unused-vars
+  } catch (err) {
+    $q.notify({ color: 'negative', message: 'Greška pri spremanju.' })
+  } finally {
+    spremanje.value = false
+  }
+}
 
 const odjava = () => {
   $q.dialog({
@@ -79,8 +145,8 @@ const odjava = () => {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    auth.logout() // Osiguraj da imaš logout akciju u auth store-u
-    router.push('/login')
+    auth.logout()
+    router.push('/auth/login')
   })
 }
 </script>

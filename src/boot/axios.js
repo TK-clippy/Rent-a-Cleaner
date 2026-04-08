@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // Koristimo localhost da se podudara s CORS postavkama backenda
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: 'http://10.194.221.79:3000/api'
 })
 
 export default defineBoot(({ app }) => {

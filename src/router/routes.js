@@ -70,7 +70,7 @@ routes.push({
   path: '/admin',
   component: () => import('layouts/AdminLayout.vue'),
   children: [
-    { path: '', name: 'admin-dashboard', component: () => import('pages/admin/AdminDashboard.vue') },
+    { path: '', name: 'admin-dashboard', component: () => import('pages/admin/AdminMetrics.vue') },
     { path: 'users', name: 'admin-users', component: () => import('pages/admin/AdminUsers.vue') },
     { path: 'metrics', name: 'admin-metrics', component: () => import('pages/admin/AdminMetrics.vue') },
     { path: 'chat', name: 'admin-chat', component: () => import('pages/admin/AdminChat.vue') },
