@@ -65,7 +65,13 @@
           <q-separator class="q-my-md" inset />
 
           <div class="text-center">
-            <q-btn flat no-caps label="Nemate račun? Registrirajte se" color="secondary" />
+            <q-btn
+              flat
+              no-caps
+              label="Nemate račun? Registrirajte se"
+              color="secondary"
+              to="/auth/register"
+            />
           </div>
         </q-card>
       </q-page>
