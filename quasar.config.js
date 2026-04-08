@@ -18,6 +18,9 @@ export default defineConfig((ctx) => {
     css: ['app.scss'],
 
     extras: ['roboto-font', 'material-icons'],
+    bin: {
+      linuxAndroidStudio: '/var/lib/flatpak/exports/bin/com.google.AndroidStudio'
+    },
 
     build: {
       target: {
