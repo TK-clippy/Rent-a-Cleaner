@@ -25,35 +25,52 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     const token = localStorage.getItem('token')
     const userStr = localStorage.getItem('user')
     let user = null
+
     try {
-      user = userStr ? JSON.parse(userStr) : null
+      user = userStr && userStr !== 'undefined' ? JSON.parse(userStr) : null
       // eslint-disable-next-line no-unused-vars
     } catch (e) {
-      localStorage.removeItem('user') // očisti pokvareni podatak
+      localStorage.removeItem('user')
       user = null
     }
 
-    console.log('GUARD:', { path: to.path, token: !!token, uloga: user?.uloga })
+    const isLoggedIn = !!token && !!user
+    const uloga = user?.uloga // 'admin', 'cleaner', 'client'
 
-    const requiresAuth =
-      to.path.startsWith('/client') ||
-      to.path.startsWith('/cleaner') ||
-      to.path.startsWith('/admin')
+    // Definiraj rute koje zahtijevaju specifične uloge
+    const isAdminRoute = to.path.startsWith('/admin')
+    const isCleanerRoute = to.path.startsWith('/cleaner')
+    const isClientRoute = to.path.startsWith('/client')
+    const requiresAuth = isAdminRoute || isCleanerRoute || isClientRoute
 
-    // 1. Ako treba login, a nema tokena
-    if (requiresAuth && !token) {
+    // 1. Ako ruta zahtijeva auth, a korisnik nije ulogiran
+    if (requiresAuth && !isLoggedIn) {
       return '/auth/login'
     }
 
-    // 2. Ako je ulogiran, a ide na login stranicu
-    if (to.path === '/auth/login' && token) {
-      const target = process.env.BUILD_TARGET || 'client'
-      if (target === 'cleaner') return '/cleaner/dashboard'
-      if (target === 'admin') return '/admin'
+    // 2. LOGIKA ZA ADMIN BUILD TARGET & ROLE PROTECTION
+    // Ako korisnik pokuša ući na /admin, a NIJE admin -> baci ga na login ili home
+    if (isAdminRoute && uloga !== 'admin') {
+      return '/auth/login'
+    }
+
+    // Isto vrijedi i za čistača
+    if (isCleanerRoute && uloga !== 'cleaner') {
+      return '/auth/login'
+    }
+
+    // 3. Automatski redirect s Login stranice ako je već ulogiran
+    if (to.path === '/auth/login' && isLoggedIn) {
+      if (uloga === 'admin') return '/admin'
+      if (uloga === 'cleaner') return '/cleaner/dashboard'
       return '/client/home'
     }
 
-    // U suprotnom, dopusti navigaciju (nema povratne vrijednosti)
+    // 4. Ako admin pokuša otići na klijentski home, možda ga želiš pustiti,
+    // ali za strogi "Admin Build" obično ga držimo unutar /admin
+    if (process.env.BUILD_TARGET === 'admin' && uloga === 'admin' && to.path === '/') {
+      return '/admin'
+    }
   })
 
   return Router

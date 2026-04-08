@@ -2,116 +2,61 @@
 
 Statusni izvještaj i tehnička dokumentacija projekta
 
-Datum zadnjeg ažuriranja: Travanj 2024.
+Datum zadnjeg ažuriranja: Travanj 2026. (Update: Sigurnost Autentifikacije & Routing Fix)
 
-Tehnološki Stack: Quasar Framework (Vue 3), Node.js (Express), MySQL.
+Tehnološki Stack: Quasar Framework (Vue 3), Pinia, Axios, Node.js (Express), MySQL.
+1. ✅ Što je do sada urađeno?
+A. Backend Arhitektura
 
-1. 🎯 Cilj Projekta
+    Baza Podataka: Shema tkatic aktivna na ucka.veleri.hr.
 
-Izrada platforme za pronalazak i rezervaciju čistača/čistačica po uzoru na moderne aplikacije za dostavu hrane (Wolt/Glovo).
+    API Server: Express server (Port 3000) s JWT sustavom i bcryptjs hashiranjem.
 
-    Klijenti: Naručuju usluge, biraju čistače, plaćaju i ocjenjuju.
+    Rute: Auth (Login/Register), Services, Bookings potpuno funkcionalni.
 
-    Čistači: Upravljaju kalendarom i radnim nalozima.
+B. Frontend Integracija & Auth (Novo 🚀)
 
-    Agencija (Admin): Upravlja bazom, analitikom i resursima.
+    Axios Setup: Implementiran boot/axios.js s interceptorom koji automatski lijepi Bearer token u header svake molbe.
 
-2.  ✅ Šta je do sada urađeno?
-    A. Frontend Arhitektura & Dizajn
+    Pinia Auth Store: auth.js upravlja stanjem korisnika, tokenom i perzistencijom u localStorage.
 
-        Modularnost (Novo): Uvedena mapa src/components za višekratne UI elemente.
+    UI Feedback: Aktiviran Quasar Notify plugin za prikaz uspješnih/neuspješnih prijava.
 
-        Naming Convention: Implementiran Multi-word standard za sve .vue datoteke (ESLint compliant).
+    Pametni Routing: Implementiran navigation guard koji automatski preusmjerava korisnika na /admin, /cleaner ili /client ovisno o njegovoj ulozi (uloga).
 
-        Modern UI (Custom CSS):
+2. 🛠️ Riješeni Kritični Problemi (Bug Log)
 
-            Potpuno redizajniran Quasar izgled kroz app.scss.
+    JSON Parse Error: Ispravljen pad aplikacije u router/index.js. Guard je pucao jer je localStorage nekad vraćao string "undefined". Uveden try-catch blok za sigurno parsiranje korisničkih podataka.
 
-            Uvedeni zaobljeni rubovi (12-16px), mekana sjena (opacity 3-5%) i iOS-style blur efekti.
+    Login Redirect Fix: Riješen problem gdje je bio potreban ručni refresh nakon prijave. Sada se router.push izvršava odmah nakon uspješnog API odgovora.
 
-            Uklonjen prisilni uppercase na gumbima i tabovima.
+    Safe Headers: Tokeni se sada dinamički dodaju u Axios defaultne headere odmah pri prijavi, bez potrebe za ponovnim učitavanjem stranice.
 
-B. Implementirane Stranice (Klijentski modul)
+3. 🏁 Trenutno Stanje
 
-    ClientHome: Dashboard s kategorijama usluga i preporučenim čistačima.
+    Protokol prijave: Korisnik se prijavljuje -> Token i User idu u localStorage -> Pinia se ažurira -> Prikazuje se Notify poruka -> Router preusmjerava na početnu stranicu uloge.
 
-    ClientSearch: Napredna pretraga s filtriranjem po tipu usluge (Osnovno, Dubinsko, itd.).
+    Stabilnost: Aplikacija se više ne "zacrni" (prazan ekran) pri osvježavanju jer guard sigurno obrađuje prazne ili neispravne tokene.
 
-    ClientCheckout: Logika za odabir termina, unos kvadrature i kalkulaciju cijene s opremom.
+🚀 Što je sljedeće? (Roadmap)
+FAZA 1: Dinamički podaci (Prioritet)
 
-    ClientBookings: Sučelje s tabovima za nadolazeće poslove i povijest s opcijom recenziranja.
+    ClientHome: Povlačenje stvarnih kategorija usluga iz tablice Services.
 
-C. Reusable Komponente (Novo)
+    CleanerSearch: Implementacija pretrage čistača po bazi podataka umjesto statičnih mock podataka.
 
-    CleanerCard.vue: Standardizirana kartica s podacima o čistaču (avatar, ocjena, cijena).
+FAZA 2: Profil & Terminologija
 
-    ServiceCategory.vue: Vizualna kartica za kategorije usluga s overlay efektom i slikama.
+    Cleaner Dashboard: Izrada sučelja za čistače gdje vide svoje nadolazeće poslove.
 
-3. 📂 Trenutna Struktura Datoteka
-   Plaintext
+    User Profile: Mogućnost izmjene lozinke i osobnih podataka.
 
-src/
-├── css/
-│ ├── app.scss # Tvoj novi moderni CSS (bez sjena, zaobljeni rubovi)
-│ └── quasar.variables.scss # Definirane primarne boje (plava, tamna, itd.)
-├── layouts/
-│ ├── ClientLayout.vue # Glavni okvir za klijente (s bottom navigacijom)
-│ ├── CleanerLayout.vue # Okvir za čistače (kalendar i radni nalozi)
-│ └── AdminLayout.vue # Desktop Sidebar layout za agenciju
-├── pages/
-│ ├── auth/ # Prijava i registracija korisnika
-│ │ └── Login.vue
-│ ├── client/ # MODUL: NARUČITELJ (Klijent)
-│ │ ├── ClientHome.vue # Početna: Odabir usluga (Generalno, Bazeni, itd.)
-│ │ ├── ClientSearch.vue # Lista čistača s ocjenama i filterima
-│ │ ├── ClientCheckout.vue # Rezervacija termina i najam opreme
-│ │ └── ClientBookings.vue # Povijest čišćenja i ostavljanje recenzija
-│ ├── cleaner/ # MODUL: ZAPOSLENIK (Čistač)
-│ │ ├── CleanerDashboard.vue # Pregled dodijeljenih poslova
-│ │ ├── CleanerCalendar.vue # Unos slobodnih termina (Availability)
-│ │ ├── ActiveJob.vue # Sučelje za rad na terenu (Start/Stop)
-│ │ └── CleanerProfile.vue # CV čistača i statistika ocjena
-│ └── admin/ # MODUL: AGENCIJA (Desktop Admin)
-│ ├── AdminMetrics.vue # Analitika, financije i učinak zaposlenika
-│ ├── AdminUsers.vue # Upravljanje bazom klijenata i čistača
-│ └── AdminChat.vue # Centralni sustav za podršku i ponude
-├── router/
-│ └── routes.js # Poveznica između URL-ova i ovih novih komponenti
-├── stores/ # Pinia (State Management za login i košaricu)
-└── components/ # Dijeljeni UI elementi (npr. CleanerCard.vue)
-├── CleanerCard.vue # Kartica čistača (Reusable)
-├── ServiceCategory.vue # One 4 kartice s početne (Osnovno, Dubinsko...)
-└── BookingSummary.vue # Sažetak cijene (koji smo imali u Checkoutu)
+💡 Tehničke Bilješke (Podsjetnik za dev tim)
 
-4.  🚀 Šta još moramo napraviti? (Roadmap)
-    FAZA 1: Povezivanje i State (Frontend)
+    LocalStorage Guard: Uvijek koristiti try { JSON.parse(...) } kada se čita iz localStorage. Nikada ne pretpostavljaj da je podatak ispravan JSON.
 
-        Axios Setup: Povezivanje s Express backendom (http://localhost:3000).
+    Uloge (Roles): Provjeriti jesu li nazivi uloga u bazi (admin, cleaner, client) usklađeni s provjerama u UserLogin.vue i router/index.js.
 
-        Pinia Stores: * useAuthStore (Login status).
+    App Mode: Trenutno su sve rute (client, cleaner, admin) dostupne unutar istog builda radi lakšeg testiranja preusmjeravanja.
 
-            useBookingStore (Privremeno čuvanje odabira do potvrde plaćanja).
-
-        Dinamički podaci: Zamjena statičnih ref lista podacima iz MySQL baze.
-
-FAZA 2: Čistač & Admin Moduli
-
-    Cleaner Modul: Izrada CleanerCalendar za unos slobodnih termina.
-
-    Admin Modul: Implementacija AdminMetrics s grafikonima zarade.
-
-    Real-time Chat: Osnovna komunikacija klijent-agencija.
-
-FAZA 3: Sigurnost & Deployment
-
-    Auth: JWT autentifikacija i Login forma.
-
-    Validacija: Detaljna provjera unosa u Checkout formi.
-
-5. 💡 Tehničke Bilješke
-
-   Navigacija: Koristiti router.push({ name: 'naziv-rute', query: { ... } }) za prijenos parametara između stranica.
-
-   UI Standard: Za sve nove kartice koristiti q-card s klasom koja automatski nasljeđuje stilove iz app.scss.
-
-   Backend Sync: Svaka promjena u tablici Usluge_Ciscenja mora biti vidljiva u ServiceCategory komponenti.
+    Notify Plugin: Ako Notify ne radi, provjeri je li dodan u quasar.config.js pod framework -> plugins.

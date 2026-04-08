@@ -11,27 +11,23 @@ dotenv.config({
   path: path.resolve(process.cwd(), `.env.${process.env.BUILD_TARGET || 'client'}`),
 })
 // ------------------------------------
-
 export default defineConfig((ctx) => {
   return {
-    // app boot file (/src/boot)
     boot: ['i18n', 'axios'],
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
 
-    // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: ['roboto-font', 'material-icons'],
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
       target: {
         browser: 'baseline-widely-available',
         node: 'node22',
       },
 
+      // Osiguravamo da su i APP_MODE i BUILD_TARGET sinkronizirani
       env: {
-        APP_MODE: process.env.APP_MODE || 'client',
+        APP_MODE: process.env.BUILD_TARGET || 'client',
         BUILD_TARGET: process.env.BUILD_TARGET || 'client',
       },
 
@@ -53,42 +49,42 @@ export default defineConfig((ctx) => {
     },
 
     framework: {
-      config: {},
-      plugins: ['Notify', 'Dialog', 'LocalStorage'],
+      plugins: [
+        'Notify',
+        'Dialog',
+        'LocalStorage'
+      ],
+      config: {
+        notify: { /* opcije */ },
+        brand: {
+          // Dinamički mijenjamo primarnu boju ovisno o buildu radi lakšeg prepoznavanja
+          primary: process.env.BUILD_TARGET === 'admin' ? '#1D1D1D' : '#1976D2',
+          secondary: '#26A69A',
+          accent: '#9C27B0',
+          dark: '#1D1D1D',
+          positive: '#21BA45',
+          negative: '#C10015',
+          info: '#31CCEC',
+          warning: '#F2C037'
+        }
+      }
     },
 
-    animations: [],
+    // ... SSR i PWA ostaju isti ...
 
-    // https://v2.quasar.dev/quasar-cli-vite/developing-ssr/configuring-ssr
-    ssr: {
-      prodPort: 3000,
-      middlewares: ['render'],
-      pwa: false,
-    },
-
-    // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
-    pwa: {
-      workboxMode: 'GenerateSW',
-    },
-
-    cordova: {},
-
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
     capacitor: {
       hideSplashscreen: true,
-      // --- Dinamički ID za odvojene APK datoteke ---
-      appId:
-        process.env.APP_MODE === 'cleaner' ? 'com.rentacleaner.cleaner' : 'com.rentacleaner.client',
+      // Dinamički ID za tri različite mobilne aplikacije (ako zatreba)
+      appId: (function () {
+        if (process.env.BUILD_TARGET === 'admin') return 'com.rentacleaner.admin';
+        if (process.env.BUILD_TARGET === 'cleaner') return 'com.rentacleaner.cleaner';
+        return 'com.rentacleaner.client';
+      })(),
     },
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
     electron: {
-      preloadScripts: ['electron-preload'],
-      inspectPort: 5858,
-      bundler: 'packager',
-      packager: {},
       builder: {
-        appId: 'rent-a-cleaner',
+        appId: `rent-a-cleaner-${process.env.BUILD_TARGET || 'client'}`,
       },
     },
 

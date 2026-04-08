@@ -1,32 +1,52 @@
-src/
-├── css/
-│   ├── app.scss              # Tvoj novi moderni CSS (bez sjena, zaobljeni rubovi)
-│   └── quasar.variables.scss # Definirane primarne boje (plava, tamna, itd.)
-├── layouts/
-│   ├── ClientLayout.vue      # Glavni okvir za klijente (s bottom navigacijom)
-│   ├── CleanerLayout.vue     # Okvir za čistače (kalendar i radni nalozi)
-│   └── AdminLayout.vue       # Desktop Sidebar layout za agenciju
-├── pages/
-│   ├── auth/                 # Prijava i registracija korisnika
-│   │   └── Login.vue
-│   ├── client/               # MODUL: NARUČITELJ (Klijent)
-│   │   ├── ClientHome.vue     # Početna: Odabir usluga (Generalno, Bazeni, itd.)
-│   │   ├── ClientSearch.vue   # Lista čistača s ocjenama i filterima
-│   │   ├── ClientCheckout.vue # Rezervacija termina i najam opreme
-│   │   └── ClientBookings.vue # Povijest čišćenja i ostavljanje recenzija
-│   ├── cleaner/              # MODUL: ZAPOSLENIK (Čistač)
-│   │   ├── CleanerDashboard.vue # Pregled dodijeljenih poslova
-│   │   ├── CleanerCalendar.vue  # Unos slobodnih termina (Availability)
-│   │   ├── ActiveJob.vue        # Sučelje za rad na terenu (Start/Stop)
-│   │   └── CleanerProfile.vue   # CV čistača i statistika ocjena
-│   └── admin/                # MODUL: AGENCIJA (Desktop Admin)
-│       ├── AdminMetrics.vue     # Analitika, financije i učinak zaposlenika
-│       ├── AdminUsers.vue       # Upravljanje bazom klijenata i čistača
-│       └── AdminChat.vue        # Centralni sustav za podršku i ponude
-├── router/
-│   └── routes.js             # Poveznica između URL-ova i ovih novih komponenti
-├── stores/                   # Pinia (State Management za login i košaricu)
-└── components/               # Dijeljeni UI elementi (npr. CleanerCard.vue)
-	├── CleanerCard.vue      # Kartica čistača (Reusable)
-	├── ServiceCategory.vue  # One 4 kartice s početne (Osnovno, Dubinsko...)
-	└── BookingSummary.vue   # Sažetak cijene (koji smo imali u Checkoutu)
+Rent-a-Cleaner/
+├── backend/ # NODE.JS BACKEND MODUL
+│ ├── src/
+│ │ ├── config/
+│ │ │ └── db.js # MySQL konekcija (mysql2 pool)
+│ │ ├── controllers/ # Business logika aplikacije
+│ │ │ ├── authController.js # Login i Registracija
+│ │ │ ├── bookingController.js # Upravljanje rezervacijama
+│ │ │ └── cleanerController.js # Podaci o čistačima i uslugama
+│ │ ├── middlewares/ # Sigurnosni slojevi
+│ │ │ └── authMiddleware.js # Validacija JWT tokena
+│ │ ├── routes/ # API Endpoints
+│ │ │ ├── authRoutes.js
+│ │ │ ├── bookingRoutes.js
+│ │ │ └── cleanerRoutes.js
+│ │ └── server.js # Glavna Express datoteka
+│ ├── .env # Privatne varijable (DB_PASS, JWT_SECRET)
+│ └── package.json # Skripte (npm run dev)
+├── src/ # QUASAR FRONTEND MODUL
+│ ├── css/
+│ │ ├── app.scss # Moderni CSS (blur, radius)
+│ │ └── quasar.variables.scss # Primarne boje brenda
+│ ├── layouts/
+│ │ ├── ClientLayout.vue # Okvir za klijente
+│ │ ├── CleanerLayout.vue # Okvir za čistače
+│ │ └── AdminLayout.vue # Okvir za admin sučelje
+│ ├── pages/
+│ │ ├── auth/
+│ │ │ └── Login.vue # Prijava korisnika
+│ │ ├── client/ # Modul: Klijent
+│ │ │ ├── ClientHome.vue # Odabir usluga
+│ │ │ ├── ClientSearch.vue # Pretraga čistača
+│ │ │ ├── ClientCheckout.vue # Rezervacija termina
+│ │ │ └── ClientBookings.vue # Povijest i recenzije
+│ │ ├── cleaner/ # Modul: Čistač
+│ │ │ ├── CleanerDashboard.vue # Popis dodijeljenih poslova
+│ │ │ ├── CleanerCalendar.vue # Slobodni termini
+│ │ │ └── CleanerProfile.vue # Statistika i profil
+│ │ └── admin/ # Modul: Admin
+│ │ ├── AdminMetrics.vue # Analitika i financije
+│ │ └── AdminUsers.vue # Upravljanje bazom
+│ ├── components/ # Reusable UI komponente
+│ │ ├── CleanerCard.vue # Kartica s profilom čistača
+│ │ ├── ServiceCategory.vue # Kartice usluga s početne
+│ │ └── BookingSummary.vue # Izračun cijene (Checkout)
+│ ├── router/
+│ │ └── routes.js # Vue Router konfiguracija
+│ └── stores/ # Pinia State Management
+├── notes/ # Dokumentacija (Gitignored)
+├── .gitignore # Isključuje .env, node_modules i notes/
+├── quasar.config.js # Glavna konfiguracija Quasara
+└── package.json # Frontend dependencyji (axios, pinia)
