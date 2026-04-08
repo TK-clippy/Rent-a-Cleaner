@@ -55,6 +55,35 @@ export const getCleanerStats = async (req, res) => {
   }
 }
 
+// GET /api/cleaners/profile
+export const getCleanerProfile = async (req, res) => {
+  const userId = req.user.id
+  try {
+    const [[user]] = await db.execute(
+      'SELECT u.ime_prezime, u.email, u.telefon, cp.bio, cp.cijena_po_satu, cp.prosjecna_ocjena, cp.ukupno_poslova FROM Users u JOIN Cleaner_Profiles cp ON u.id = cp.user_id WHERE u.id = ?',
+      [userId]
+    )
+    res.json(user)
+    // eslint-disable-next-line no-unused-vars
+  } catch (error) {
+    res.status(500).json({ poruka: 'Greška pri dohvaćanju profila' })
+  }
+}
+
+// PUT /api/cleaners/profile
+export const updateCleanerProfile = async (req, res) => {
+  const userId = req.user.id
+  const { bio, cijena_po_satu, telefon } = req.body
+  try {
+    await db.execute('UPDATE Users SET telefon = ? WHERE id = ?', [telefon, userId])
+    await db.execute('UPDATE Cleaner_Profiles SET bio = ?, cijena_po_satu = ? WHERE user_id = ?', [bio, cijena_po_satu, userId])
+    res.json({ poruka: 'Profil uspješno ažuriran.' })
+    // eslint-disable-next-line no-unused-vars
+  } catch (error) {
+    res.status(500).json({ poruka: 'Greška pri ažuriranju profila' })
+  }
+}
+
 // GET /api/cleaners/calendar (Dohvaćanje smjena)
 export const getAvailability = async (req, res) => {
   const userId = req.user.id
