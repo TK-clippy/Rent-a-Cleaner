@@ -14,13 +14,7 @@
       <q-list padding class="text-grey-9">
         <q-item-label header class="text-weight-bold">UPRAVLJAČKA PLOČA</q-item-label>
 
-        <q-item
-          clickable
-          v-ripple
-          exact
-          to="/admin/dashboard"
-          active-class="bg-blue-1 text-primary"
-        >
+        <q-item clickable v-ripple exact to="/admin" active-class="bg-blue-1 text-primary">
           <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
           <q-item-section>Nadzorna ploča</q-item-section>
         </q-item>
@@ -30,14 +24,14 @@
           <q-item-section>Korisnici & Čistači</q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/admin/services" active-class="bg-blue-1 text-primary">
-          <q-item-section avatar><q-icon name="cleaning_services" /></q-item-section>
-          <q-item-section>Usluge i Cijene</q-item-section>
+        <q-item clickable v-ripple to="/admin/metrics" active-class="bg-blue-1 text-primary">
+          <q-item-section avatar><q-icon name="bar_chart" /></q-item-section>
+          <q-item-section>Financije i Metrika</q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/admin/bookings" active-class="bg-blue-1 text-primary">
-          <q-item-section avatar><q-icon name="event_note" /></q-item-section>
-          <q-item-section>Sve Rezervacije</q-item-section>
+        <q-item clickable v-ripple to="/admin/chat" active-class="bg-blue-1 text-primary">
+          <q-item-section avatar><q-icon name="forum" /></q-item-section>
+          <q-item-section>Chat podrška</q-item-section>
         </q-item>
       </q-list>
     </q-drawer>
@@ -63,6 +57,6 @@ const toggleLeftDrawer = () => {
 
 const odjava = () => {
   auth.logout()
-  router.push('/login')
+  router.push('/auth/login')
 }
 </script>
