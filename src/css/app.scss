@@ -1,12 +1,12 @@
 /* Globalni stilovi */
 body {
-  background-color: var(--q-body-background, #f8f9fa);
+  background-color: var(--q-body-background, #f2f2f7); /* iOS siva pozadina */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* Gumbi - moderniji i zaobljeni */
 .q-btn {
-  border-radius: 12px;
+  border-radius: 14px; /* Malo više zaobljeno */
   text-transform: none !important;
   font-weight: 600;
   letter-spacing: 0.2px;
@@ -16,43 +16,43 @@ body {
   min-height: 48px;
 }
 
-/* Kartice s mekanim sjenama */
+/* Kartice s mekanim sjenama (Apple stil) */
 .q-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 /* Input polja - "Bubble" dizajn */
 .q-field--filled .q-field__control {
-  border-radius: 12px;
+  border-radius: 14px;
   background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .q-field--filled .q-field__control:before,
 .q-field--filled .q-field__control:after {
-  display: none !important; /* Uklanja defaultne linije */
+  display: none !important;
 }
 
-/* Header - Blur efekt i suptilan obrub */
+/* Header - Blur efekt (iOS staklo) */
 .q-header {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(15px) !important;
-  color: #2b2d42 !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03) !important;
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  color: #1c1c1e !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Footer - Mekana gornja sjena */
+/* Footer */
 .q-footer {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #8d99ae !important;
-  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.04) !important;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  color: #8e8e93 !important;
   border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Uklanjanje sistemskih sjena */
 .q-layout__shadow:after {
   box-shadow: none !important;
 }
@@ -61,22 +61,41 @@ body {
 .q-tabs__indicator {
   display: none !important;
 }
-
 .q-tab--active {
   color: var(--q-primary) !important;
 }
-
 .q-tab__label {
   text-transform: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* Liste i dijalozi */
-.q-item {
-  border-radius: 12px;
-  margin-bottom: 4px;
+/* Dropdown Meni (q-menu) - NOVO */
+.q-menu {
+  border-radius: 16px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 4px; /* Odmaknemo iteme od ruba */
+
+  .q-item {
+    border-radius: 10px;
+    margin-bottom: 2px;
+  }
 }
 
-.q-dialog__inner > div {
-  border-radius: 20px !important;
+/* iOS stil listi (Postavke) - NOVO */
+.ios-list {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  overflow: hidden; /* Da rubovi prate container */
+
+  .q-item {
+    border-radius: 0; /* Spajamo iteme */
+    margin-bottom: 0;
+    padding: 12px 16px;
+  }
 }
