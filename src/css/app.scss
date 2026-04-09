@@ -1,3 +1,31 @@
+/* 1. Uvoz Apple-like fonta */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* Globalni stilovi */
+body {
+  background-color: var(--q-body-background, #f2f2f7);
+  /* font-family se sada vuče iz quasar.variables.scss */
+}
+
+/* Postavke za input polja unutar kartica - manji radius */
+.inner-input .q-field__control {
+  border-radius: 10px !important;
+}
+
+/* iOS stil liste za Postavke */
+.ios-list {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.ios-list .q-item {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+}
+
 /* Globalni stilovi */
 body {
   background-color: var(--q-body-background, #f2f2f7); /* iOS siva pozadina */
