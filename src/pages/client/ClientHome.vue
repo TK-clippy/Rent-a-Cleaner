@@ -5,9 +5,6 @@
         <div class="text-h5 text-weight-bold">Pozdrav, {{ imeKorisnika }}!</div>
         <div class="text-subtitle2 text-grey-7">Što čistimo danas?</div>
       </div>
-      <q-btn round flat icon="notifications" color="grey-7">
-        <q-badge color="red" floating>2</q-badge>
-      </q-btn>
     </div>
 
     <div class="row q-col-gutter-md q-mb-xl">
