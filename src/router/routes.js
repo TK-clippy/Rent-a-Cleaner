@@ -26,6 +26,11 @@ routes.push({
       name: 'client-bookings',
       component: () => import('pages/client/ClientBookings.vue'),
     },
+    {
+      path: 'profile', // Ako je ovo unutar /cleaner, stvarni path je /cleaner/profile
+      name: 'cleaner-profile',
+      component: () => import('pages/cleaner/CleanerProfile.vue')
+    },
   ],
 })
 
