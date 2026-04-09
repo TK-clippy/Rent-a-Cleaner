@@ -99,3 +99,25 @@ body {
     padding: 12px 16px;
   }
 }
+
+/* app.scss */
+
+/* Postavke za input polja unutar kartica - manji radius (npr. 10px umjesto 14px/20px) */
+.inner-input .q-field__control {
+  border-radius: 10px !important;
+}
+
+/* iOS stil liste za Postavke */
+.ios-list {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+/* Fiksna visina za stavke u postavkama */
+.ios-list .q-item {
+  min-height: 64px; /* Svi će imati istu visinu bez obzira na sadržaj */
+  display: flex;
+  align-items: center;
+}

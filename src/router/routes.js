@@ -1,4 +1,3 @@
-// Za sada zanemarujemo APP_MODE kako bismo testirali rade li sve rute ispravno.
 const routes = []
 
 // --- KLIJENT (Client Portal) ---
@@ -26,13 +25,16 @@ routes.push({
       name: 'client-bookings',
       component: () => import('pages/client/ClientBookings.vue'),
     },
+    // POPRAVLJENO OVDJE:
     {
-      path: 'profile', // Ako je ovo unutar /cleaner, stvarni path je /cleaner/profile
-      name: 'cleaner-profile',
-      component: () => import('pages/cleaner/CleanerProfile.vue')
+      path: 'profile',
+      name: 'client-profile', // Mora biti client-profile, ne cleaner-profile
+      component: () => import('pages/client/ClientProfile.vue') // Mora biti ClientProfile
     },
   ],
 })
+
+// ... ostatak (auth, cleaner, admin) ostaje isti ...
 
 // --- AUTH (Prijava i Registracija) ---
 routes.push({
