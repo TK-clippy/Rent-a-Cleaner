@@ -41,22 +41,28 @@ export const getAllUsers = async (req, res) => {
 // GET /api/admin/metrics
 export const getMetrics = async (req, res) => {
   try {
+    // 1. Ukupni promet - promijenjeno na "Završeno"
     const [[prihod]] = await db.execute(
-      'SELECT COALESCE(SUM(ukupna_cijena), 0) as ukupno FROM Bookings WHERE status = "completed"'
+      'SELECT COALESCE(SUM(ukupna_cijena), 0) as ukupno FROM Bookings WHERE status = "Završeno"'
     )
+
+    // 2. Top čistači - promijenjeno na "Završeno"
     const [topCistaci] = await db.execute(`
       SELECT u.ime_prezime, COUNT(b.id) as poslova, COALESCE(SUM(b.ukupna_cijena * 0.8), 0) as zarada
       FROM Bookings b
       JOIN Users u ON b.cleaner_id = u.id
-      WHERE b.status = "completed"
+      WHERE b.status = "Završeno"
       GROUP BY b.cleaner_id
       ORDER BY poslova DESC
       LIMIT 5
     `)
+
+    // 3. Popularne usluge (ovdje status obično nije bitan, ali možeš dodati ako želiš samo završene)
     const [popularneUsluge] = await db.execute(`
       SELECT s.naziv, COUNT(b.id) as broj
       FROM Bookings b
       JOIN Services s ON b.service_id = s.id
+      WHERE b.status = "Završeno"
       GROUP BY b.service_id
       ORDER BY broj DESC
     `)
@@ -71,11 +77,10 @@ export const getMetrics = async (req, res) => {
       popularneUsluge,
     })
   } catch (error) {
-    console.error(error)
+    console.error('Greška u metrics kontroleru:', error)
     res.status(500).json({ poruka: 'Greška pri učitavanju metrika.' })
   }
 }
-
 // DELETE /api/admin/users/:id
 export const deleteUser = async (req, res) => {
   try {
