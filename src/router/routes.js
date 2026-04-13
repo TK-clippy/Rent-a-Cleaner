@@ -25,16 +25,13 @@ routes.push({
       name: 'client-bookings',
       component: () => import('pages/client/ClientBookings.vue'),
     },
-    // POPRAVLJENO OVDJE:
     {
       path: 'profile',
-      name: 'client-profile', // Mora biti client-profile, ne cleaner-profile
-      component: () => import('pages/client/ClientProfile.vue') // Mora biti ClientProfile
+      name: 'client-profile',
+      component: () => import('pages/client/ClientProfile.vue')
     },
   ],
 })
-
-// ... ostatak (auth, cleaner, admin) ostaje isti ...
 
 // --- AUTH (Prijava i Registracija) ---
 routes.push({
@@ -78,15 +75,35 @@ routes.push({
 })
 
 // --- ADMIN (Control Panel) ---
-// --- ADMIN ---
 routes.push({
   path: '/admin',
   component: () => import('layouts/AdminLayout.vue'),
+  redirect: '/admin/dashboard',
   children: [
-    { path: '', name: 'admin-dashboard', component: () => import('pages/admin/AdminMetrics.vue') },
-    { path: 'users', name: 'admin-users', component: () => import('pages/admin/AdminUsers.vue') },
-    { path: 'metrics', name: 'admin-metrics', component: () => import('pages/admin/AdminMetrics.vue') },
-    { path: 'chat', name: 'admin-chat', component: () => import('pages/admin/AdminChat.vue') },
+    {
+      path: 'dashboard',
+      name: 'admin-dashboard',
+      component: () => import('pages/admin/AdminDashboard.vue')
+    },
+    {
+      path: 'metrics',
+      name: 'admin-metrics',
+      component: () => import('pages/admin/AdminMetrics.vue')
+    },
+    {
+      path: 'users',
+      name: 'admin-users',
+      component: () => import('pages/admin/AdminUsers.vue')
+    },
+    {
+      path: 'chat',
+      name: 'admin-chat',
+      component: () => import('pages/admin/AdminChat.vue')
+    },
+    {
+      path: ':catchAll(.*)*',
+      redirect: '/admin/dashboard'
+    }
   ],
 })
 
