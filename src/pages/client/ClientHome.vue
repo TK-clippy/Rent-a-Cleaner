@@ -81,6 +81,9 @@ const ucitajPodatke = async () => {
     kategorije.value = []
   }
 
+  const resCleaners = await api.get('/cleaners')
+  console.log('Podaci s API-ja:', resCleaners.data[0]) // Pogledaj prvu stavku u konzoli
+
   try {
     const resCleaners = await api.get('/cleaners')
     const cleaners = Array.isArray(resCleaners.data) ? resCleaners.data : []
@@ -92,9 +95,9 @@ const ucitajPodatke = async () => {
       cijena: c.cijena_po_satu || '—',
       ocjena: c.prosjecna_ocjena || '—',
       brojRecenzija: c.broj_recenzija || 0,
-      avatar:
-        c.avatar ||
-        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(c.ime_prezime)}`,
+      ukupnoPoslova: c.ukupno_poslova || 0,
+
+      avatar: c.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${c.ime_prezime}`,
     }))
   } catch (err) {
     console.error('Greška cleaners:', err)

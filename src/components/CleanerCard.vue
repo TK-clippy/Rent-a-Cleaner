@@ -4,17 +4,28 @@
       <q-avatar size="70px" class="q-mr-md shadow-2">
         <img :src="cistac.avatar || cistac.slika" />
       </q-avatar>
-      
+
       <div class="col">
         <div class="text-subtitle1 text-weight-bolder">{{ cistac.ime }} {{ cistac.prezime }}</div>
         <div class="text-caption text-grey-7 ellipsis">
           {{ Array.isArray(cistac.usluge) ? cistac.usluge.join(', ') : 'Sve vrste čišćenja' }}
         </div>
-        
+
         <div class="row items-center q-mt-xs">
           <q-icon name="star" color="accent" size="18px" />
           <span class="text-weight-bold q-ml-xs">{{ cistac.ocjena }}</span>
-          <span class="text-grey-6 q-ml-xs text-caption">({{ cistac.brojRecenzija || cistac.recenzije }})</span>
+          <span class="text-grey-6 q-ml-xs text-caption"
+            >({{ cistac.brojRecenzija || cistac.recenzije }})</span
+          >
+
+          <q-icon name="fiber_manual_record" size="4px" color="grey-5" class="q-mx-sm" />
+
+          <div class="row items-center">
+            <q-icon name="check_circle_outline" size="14px" color="positive" class="q-mr-xs" />
+            <span class="text-caption text-grey-8">
+              <span class="text-weight-bold">{{ cistac.ukupnoPoslova }}</span> poslova
+            </span>
+          </div>
         </div>
       </div>
 
@@ -33,8 +44,8 @@
 defineProps({
   cistac: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // Definiramo emitere (događaje) koje komponenta šalje roditelju
