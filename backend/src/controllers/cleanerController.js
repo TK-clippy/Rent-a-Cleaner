@@ -21,13 +21,16 @@ export const getAllCleaners = async (req, res) => {
         cp.bio,
         cp.cijena_po_satu,
         cp.prosjecna_ocjena,
-        GROUP_CONCAT(s.naziv SEPARATOR ', ') AS usluge
+        cp.ukupno_poslova, -- DODANO: Sada povlačimo podatak iz Cleaner_Profiles
+        (
+          SELECT GROUP_CONCAT(DISTINCT s.naziv SEPARATOR ', ')
+          FROM Services s
+          JOIN Bookings b ON s.id = b.service_id
+          WHERE b.cleaner_id = u.id
+        ) AS usluge -- Popravljeno: DISTINCT rješava duplikate koje si imao
       FROM Users u
       JOIN Cleaner_Profiles cp ON u.id = cp.user_id
-      LEFT JOIN Bookings b ON u.id = b.cleaner_id
-      LEFT JOIN Services s ON b.service_id = s.id
       WHERE u.uloga = 'cleaner'
-      GROUP BY u.id, u.ime_prezime, cp.bio, cp.cijena_po_satu, cp.prosjecna_ocjena
     `
     const [cleaners] = await db.execute(query)
     res.json(cleaners)
