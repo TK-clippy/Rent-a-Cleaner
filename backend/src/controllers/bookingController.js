@@ -11,14 +11,15 @@ export const createBooking = async (req, res) => {
     vrijeme_pocetka,
     ukupna_cijena,
     oprema_agencije,
+    napomena,
   } = req.body
   const client_id = req.user.id
 
   try {
     const [result] = await db.execute(
       `INSERT INTO Bookings
-      (client_id, cleaner_id, service_id, adresa, kvadratura, datum_ciscenja, vrijeme_pocetka, ukupna_cijena, oprema_agencije, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Na čekanju')`,
+      (client_id, cleaner_id, service_id, adresa, kvadratura, datum_ciscenja, vrijeme_pocetka, ukupna_cijena, oprema_agencije, napomena, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Na čekanju')`, // <--- DODAJ 10. upitnik
       [
         client_id,
         cleaner_id,
@@ -29,6 +30,7 @@ export const createBooking = async (req, res) => {
         vrijeme_pocetka,
         ukupna_cijena,
         oprema_agencije,
+        napomena, // <--- DODAJ OVO
       ],
     )
     res.status(201).json({ poruka: 'Rezervacija uspješno kreirana', bookingId: result.insertId })
