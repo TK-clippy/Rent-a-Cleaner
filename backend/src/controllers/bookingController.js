@@ -2,6 +2,8 @@ import db from '../config/db.js'
 
 // 1. KREIRANJE REZERVACIJE
 export const createBooking = async (req, res) => {
+  console.log("Stigao zahtjev za booking:", req.body);
+
   const {
     cleaner_id,
     service_id,
@@ -13,29 +15,55 @@ export const createBooking = async (req, res) => {
     oprema_agencije,
     napomena,
   } = req.body
+
   const client_id = req.user.id
+
+  // 1. OSIGURANJE TIPOVA PODATAKA (Bitno za mrežne filtere na ucka)
+  // Pretvaramo true/false u 1/0 jer neki MySQL filteri ne vole boolean objekte
+  const oprema = oprema_agencije === true || oprema_agencije === 1 ? 1 : 0;
+
+  // Osiguravamo da su brojevi stvarno brojevi, a ne stringovi
+  const c_id = parseInt(cleaner_id);
+  const s_id = parseInt(service_id);
+  const kvad = parseInt(kvadratura);
+  const cijena = parseFloat(ukupna_cijena);
+
+  // Ako je napomena prazna, stavljamo null ili prazan string da izbjegnemo undefined
+  const napomenaFinal = napomena || "";
+  const adresaFinal = adresa || "Nije navedena";
 
   try {
     const [result] = await db.execute(
       `INSERT INTO Bookings
       (client_id, cleaner_id, service_id, adresa, kvadratura, datum_ciscenja, vrijeme_pocetka, ukupna_cijena, oprema_agencije, napomena, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Na čekanju')`, // <--- DODAJ 10. upitnik
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Na čekanju')`,
       [
-        client_id,
-        cleaner_id,
-        service_id,
-        adresa,
-        kvadratura,
-        datum_ciscenja,
-        vrijeme_pocetka,
-        ukupna_cijena,
-        oprema_agencije,
-        napomena, // <--- DODAJ OVO
+        client_id,    // 1
+        c_id,         // 2
+        s_id,         // 3
+        adresaFinal,  // 4
+        kvad,         // 5
+        datum_ciscenja, // 6 (format: 'YYYY-MM-DD')
+        vrijeme_pocetka, // 7 (format: 'HH:mm:ss')
+        cijena,       // 8
+        oprema,       // 9
+        napomenaFinal // 10
       ],
     )
-    res.status(201).json({ poruka: 'Rezervacija uspješno kreirana', bookingId: result.insertId })
+
+    console.log("Rezervacija uspješno spremljena, ID:", result.insertId);
+
+    res.status(201).json({
+      poruka: 'Rezervacija uspješno kreirana',
+      bookingId: result.insertId
+    })
   } catch (error) {
-    res.status(500).json({ poruka: 'Greška pri kreiranju', detalji: error.message })
+    console.error("DETALJNA GREŠKA NA BACKENDU:", error);
+    res.status(500).json({
+      poruka: 'Greška pri kreiranju rezervacije na serveru',
+      detalji: error.message,
+      sqlCode: error.code // Ovo će nam reći je li problem u tablici ili filteru
+    })
   }
 }
 
