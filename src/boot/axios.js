@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // Koristimo localhost da se podudara s CORS postavkama backenda
 const api = axios.create({
-  baseURL: 'https://mediumseagreen-woodpecker-306059.hostingersite.com/api'
+  baseURL: 'https://mediumseagreen-woodpecker-306059.hostingersite.com/api',
 })
 
 export default defineBoot(({ app }) => {
