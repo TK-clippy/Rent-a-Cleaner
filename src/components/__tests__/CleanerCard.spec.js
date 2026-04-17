@@ -14,26 +14,33 @@ describe('CleanerCard.vue', () => {
     usluge: ['Generalno čišćenje', 'Pranje prozora'],
   }
 
+  // Zajedničke postavke za mountanje komponente
+  const globalnaKonfiguracija = {
+    directives: {
+      ripple: {},
+    },
+    stubs: {
+      // Koristimo template sa slotovima kako bi se tekst unutar njih zapravo iscrtao
+      QCard: { template: '<div @click="$emit(\'click\')"><slot /></div>' },
+      QCardSection: { template: '<div><slot /></div>' },
+      QAvatar: { template: '<div><slot /></div>' },
+      QIcon: { template: '<span><slot /></span>' },
+      QBtn: { template: '<button><slot /></button>' },
+    },
+  }
+
   it('ispravno prikazuje ime čistača i cijenu', () => {
     const wrapper = mount(CleanerCard, {
       props: {
-        cistac: testniCistac, // Usklađeno s propom u komponenti
+        cistac: testniCistac,
       },
-      global: {
-        stubs: {
-          QCard: { template: '<div><slot /></div>' },
-          QCardSection: { template: '<div><slot /></div>' },
-          QAvatar: { template: '<div><slot /></div>' },
-          QIcon: true,
-          QBtn: true,
-        },
-      },
+      global: globalnaKonfiguracija,
     })
 
     // Provjeravamo ime i prezime
     expect(wrapper.text()).toContain('Marija')
     expect(wrapper.text()).toContain('Čisto')
-    // Provjeravamo cijenu
+    // Provjeravamo cijenu (očekujemo broj 15 uz simbol € iz templatea)
     expect(wrapper.text()).toContain('15')
   })
 
@@ -42,12 +49,13 @@ describe('CleanerCard.vue', () => {
       props: {
         cistac: testniCistac,
       },
-      global: {
-        stubs: { QCard: { template: '<div @click="$emit(\'click\')"><slot /></div>' } },
-      },
+      global: globalnaKonfiguracija,
     })
 
+    // Budući da smo QCard stubali kao div, okidamo click na njemu
     await wrapper.trigger('click')
-    expect(wrapper.emitted()).toHaveProperty('click') // Provjera emitera
+
+    // Provjera je li komponenta emitirala 'click'
+    expect(wrapper.emitted()).toHaveProperty('click')
   })
 })
